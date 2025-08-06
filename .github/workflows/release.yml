@@ -79,6 +79,13 @@ jobs:
           # Find the section starting with "## $CURRENT_TAG" and ending before the next "## " line
           awk "/^## $CURRENT_TAG /{flag=1; next} /^## /{flag=0} flag && /^###|^-|^[[:space:]]*$/{print}" CHANGELOG.md > CHANGELOG_TEMP.md
           
+          # Check if changelog content is empty and provide fallback
+          if [ ! -s CHANGELOG_TEMP.md ]; then
+            echo "## What's Changed" > CHANGELOG_TEMP.md
+            echo "" >> CHANGELOG_TEMP.md
+            echo "- Maintenance and infrastructure updates" >> CHANGELOG_TEMP.md
+          fi
+          
           # Set multiline output
           echo "content<<EOF" >> $GITHUB_OUTPUT
           cat CHANGELOG_TEMP.md >> $GITHUB_OUTPUT
