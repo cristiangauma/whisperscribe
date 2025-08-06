@@ -112,22 +112,12 @@ jobs:
             
             ## Installation
             
-            ### Option 1: Download ZIP (Recommended)
             1. Download `whisperscribe.zip` from this release
             2. Extract the zip file
             3. Copy the extracted folder to your vault's `.obsidian/plugins/` directory
             4. Reload Obsidian and enable the plugin in Settings > Community Plugins
-            
-            ### Option 2: Manual Installation
-            1. Download `manifest.json`, `main.js`, and `styles.css` from this release
-            2. Create a folder named `whisperscribe` in your vault's `.obsidian/plugins/` directory
-            3. Place the downloaded files in the new folder
-            4. Reload Obsidian and enable the plugin in Settings > Community Plugins
           files: |
             whisperscribe.zip
-            manifest.json
-            main.js
-            styles.css
           generate_release_notes: false
           draft: false
           prerelease: false
