@@ -216,11 +216,13 @@ git cz
 - Validates release files for Obsidian plugin standards:
   - Checks required files exist (`manifest.json`, `main.js`, `styles.css`)
   - Validates version consistency between tag and manifest
-- Creates GitHub release with proper Obsidian plugin files:
-  - `manifest.json` (metadata)
-  - `main.js` (compiled plugin code)  
-  - `styles.css` (styling, auto-created if missing)
-- Generates release notes with installation instructions
+- Generates changelog with commit history since previous tag
+- Creates `whisperscribe.zip` containing all plugin files for easy installation
+- Creates GitHub release with:
+  - `whisperscribe.zip` (recommended installation method)
+  - Individual files: `manifest.json`, `main.js`, `styles.css`
+  - Automated changelog showing commits between versions
+  - Installation instructions for both ZIP and manual methods
 
 ### Branch Protection Rules
 

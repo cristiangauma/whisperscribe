@@ -2,12 +2,12 @@
 
 [![CI](https://github.com/cristiangauma/whisperscribe/workflows/CI/badge.svg)](https://github.com/cristiangauma/whisperscribe/actions/workflows/ci.yml)
 
-Transcribe audio files directly in your Obsidian notes using Google Gemini and OpenAI.
+Transcribe audio files directly in your Obsidian notes using Google Gemini or OpenAI.
 
 ## Features
 
 - **Smart Model Selection** - Pre-configured cost-effective models with file size limits
-- **Multiple AI Providers** - Google Gemini and OpenAI
+- **Multiple AI Providers** - Google Gemini or OpenAI
 - **Audio Support** - Transcribe audio files (MP3, WAV, OGG, M4A) up to model-specific limits
 - **Intelligent Cost Optimization** - Recommended models prioritize cost-effectiveness
 - **Custom Model Support** - Add your own models with custom file size limits
@@ -20,7 +20,7 @@ Transcribe audio files directly in your Obsidian notes using Google Gemini and O
 
 ## Supported AI Providers
 
-WhisperScribe supports both Google Gemini and OpenAI providers for comprehensive transcription and analysis.
+WhisperScribe supports either Google Gemini or OpenAI providers for comprehensive transcription and analysis.
 
 ### 🤖 Google Gemini
 **Capabilities:** ✅ Transcription, ✅ Summarization, ✅ Tags, ✅ Diagrams  
