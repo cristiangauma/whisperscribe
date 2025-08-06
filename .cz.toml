@@ -5,6 +5,11 @@ version_scheme = "semver"
 version_provider = "npm"
 update_changelog_on_bump = true
 major_version_zero = true
-post_bump_hooks = [
-    "npm run version"
+version_files = [
+    "package.json",
+    "manifest.json",
+    "versions.json"
+]
+pre_bump_hooks = [
+    "node version-bump.mjs $CZ_PRE_NEW_VERSION"
 ]
