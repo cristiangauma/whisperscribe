@@ -1,3 +1,9 @@
+## 0.4.2 (2025-08-06)
+
+### Fix
+
+- **version**: Fix version on manifest.json
+
 ## 0.4.1 (2025-08-06)
 
 ### Fix
