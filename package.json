@@ -1,6 +1,6 @@
 {
   "name": "whisperscribe",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "Transcribe audio and video files in Obsidian using multiple AI providers",
   "main": "main.js",
   "scripts": {

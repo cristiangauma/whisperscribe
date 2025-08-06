@@ -1,7 +1,7 @@
 {
 	"id": "whisperscribe",
 	"name": "WhisperScribe",
-	"version": "0.4.2",
+	"version": "0.4.3",
 	"minAppVersion": "0.15.0",
 	"description": "Transcribe, summarize, tag and generate diagrams from audio using Google Gemini or OpenAI",
 	"author": "Cristian Gauxachs",
