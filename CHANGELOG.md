@@ -1,3 +1,9 @@
+## 0.4.0 (2025-08-06)
+
+### Fix
+
+- **version**: Fix package version to the new tag version
+
 ## 0.2.0 (2025-08-06)
 
 ### CI
