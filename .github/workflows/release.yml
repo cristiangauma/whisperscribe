@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build plugin
+        run: npm run build
+
+      - name: Create styles.css if it doesn't exist
+        run: |
+          if [ ! -f "styles.css" ]; then
+            echo "/* WhisperScribe Plugin Styles */" > styles.css
+            echo "Creating empty styles.css file"
+          fi
+
+      - name: Validate release files
+        run: |
+          echo "🔍 Validating release files..."
+          
+          # Check required files exist
+          required_files=("manifest.json" "main.js" "styles.css")
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Required file missing: $file"
+              exit 1
+            fi
+            echo "✅ Found: $file"
+          done
+          
+          # Validate manifest version matches tag
+          MANIFEST_VERSION=$(jq -r .version manifest.json)
+          TAG_VERSION=${GITHUB_REF#refs/tags/}
+          
+          if [ "$MANIFEST_VERSION" != "$TAG_VERSION" ]; then
+            echo "❌ Version mismatch: manifest.json has '$MANIFEST_VERSION' but tag is '$TAG_VERSION'"
+            exit 1
+          fi
+          
+          echo "✅ Version validation passed: $MANIFEST_VERSION"
+
+      - name: Get plugin info
+        id: plugin-info
+        run: |
+          echo "name=$(jq -r .name manifest.json)" >> $GITHUB_OUTPUT
+          echo "version=$(jq -r .version manifest.json)" >> $GITHUB_OUTPUT
+          echo "description=$(jq -r .description manifest.json)" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.plugin-info.outputs.name }} ${{ steps.plugin-info.outputs.version }}
+          body: |
+            ## ${{ steps.plugin-info.outputs.name }} v${{ steps.plugin-info.outputs.version }}
+            
+            ${{ steps.plugin-info.outputs.description }}
+            
+            ### Installation
+            
+            **Manual Installation:**
+            1. Download the `manifest.json`, `main.js` and `styles.css` files from this release
+            2. Create a new folder in your vault's `.obsidian/plugins/` directory named `whisperscribe`
+            3. Place the downloaded files in the new folder
+            4. Enable the plugin in Obsidian's settings under Community Plugins
+            
+            ### Compatibility
+            
+            Minimum Obsidian version: $(jq -r .minAppVersion manifest.json)
+            
+            ---
+            
+            🔧 **Automated Release:** This release was automatically created when tag `${{ github.ref_name }}` was pushed.
+          files: |
+            manifest.json
+            main.js
+            styles.css
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+
+      - name: Notify success
+        run: |
+          echo "🎉 Release created successfully!"
+          echo "📦 Plugin files (manifest.json, main.js, styles.css) have been attached to the release."

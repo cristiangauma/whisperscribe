@@ -1,0 +1,1 @@
+export { AITranscriptionSettingTab } from './SettingsTab';

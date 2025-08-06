@@ -1,94 +1,235 @@
-# Obsidian Sample Plugin
+# WhisperScribe Plugin for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+[![CI](https://github.com/cristiangauma/whisperscribe/workflows/CI/badge.svg)](https://github.com/cristiangauma/whisperscribe/actions/workflows/ci.yml)
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+Transcribe audio files directly in your Obsidian notes using Google Gemini and OpenAI.
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## Features
 
-## First time developing plugins?
+- **Smart Model Selection** - Pre-configured cost-effective models with file size limits
+- **Multiple AI Providers** - Google Gemini and OpenAI
+- **Audio Support** - Transcribe audio files (MP3, WAV, OGG, M4A) up to model-specific limits
+- **Intelligent Cost Optimization** - Recommended models prioritize cost-effectiveness
+- **Custom Model Support** - Add your own models with custom file size limits
+- **AI-Powered Features** (available on generalist models):
+  - **Smart Summarization** - Short, Medium, Long, or Bullet Points formats
+  - **Automatic Tagging** - Up to 5 relevant tags, properly formatted for Obsidian
+  - **Visual Diagrams** - Mermaid flowcharts organizing main ideas
+- **Smart Output Formatting** - Summary first, then transcription, followed by tags and diagrams
+- **File Size Validation** - Prevents costly oversized uploads with model-specific limits
 
-Quick starting guide for new plugin devs:
+## Supported AI Providers
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+WhisperScribe supports both Google Gemini and OpenAI providers for comprehensive transcription and analysis.
 
-## Releasing new releases
+### 🤖 Google Gemini
+**Capabilities:** ✅ Transcription, ✅ Summarization, ✅ Tags, ✅ Diagrams  
+**Available Models:** gemini-2.5-flash-lite (recommended), gemini-2.5-flash  
+📚 [View all Gemini models](https://ai.google.dev/gemini-api/docs/models)  
+*Note: Flash-Lite is the most cost-effective option for transcription tasks*
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+### 🤖 OpenAI
+**Capabilities:** ✅ Transcription, ✅ Summarization, ✅ Tags, ✅ Diagrams  
+**Popular Models:** o4-mini-2025-04-16 (recommended), whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe  
+📚 [View all OpenAI models](https://platform.openai.com/docs/models)  
+*Note: o4-mini provides the best smart analysis at low cost*
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
 
-## Adding your plugin to the community plugin list
+## Installation
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+1. Clone or download this repository
+2. Copy the plugin folder to your vault's `.obsidian/plugins/whisperscribe/` directory
+3. Enable the plugin in Obsidian's Community Plugins settings
 
-## How to use
+## Setup
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+1. **Open plugin settings** in Obsidian
+2. **Select your preferred AI provider** from the dropdown
+3. **Enter the required API key(s)** for your chosen provider
+4. **Choose a model**:
+   - **Recommended models** are pre-selected for cost-effectiveness
+   - **Custom models** allow you to specify your own model name and file size limit
+5. **Configure advanced features** (for generalist models):
+   - **Summarization** - Choose length: Short, Medium, Long, or Bullet Points
+   - **Tag Generation** - Automatic content categorization with Obsidian-compatible tags
+   - **Diagram Generation** - Visual Mermaid flowcharts of main ideas
 
-## Manually installing the plugin
+### Getting API Keys
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+- **Google Gemini**: Get from [Google AI Studio](https://aistudio.google.com/app/apikey)
+- **OpenAI**: Get from [OpenAI Platform](https://platform.openai.com/api-keys)
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
 
-## Funding URL
+## Usage
 
-You can include funding URLs where people who use your plugin can financially support it.
+### Basic Usage
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+1. Add an audio file to your note using the standard Obsidian syntax:
+   - `![[audio.ext]]` for audio files
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+2. Place your cursor on the line with the media file
+
+3. Open the command palette (Ctrl/Cmd + P) and run:
+   **"Transcribe audio with AI"
+
+4. The transcription (and optional summary) will appear below the media file after processing
+
+
+## Output Format
+
+The output will be structured based on your settings:
+
+```
+## Summary
+[AI-generated summary of the content]
+OR
+[• Bullet point 1
+ • Bullet point 2
+ • Bullet point 3...]
+
+## Transcription
+[Full transcription of the audio]
+
+## Tags
+#tag1 #tag2 #tag3 #tag4 #tag5
+
+## Chart
+```mermaid
+flowchart TD
+    A1["Main Idea 1"]
+    A2["Supporting Point"]
+    A3["Conclusion"]
+    A1 --> A2
+    A2 --> A3
 ```
 
-If you have multiple URLs, you can also do:
+When all optional features are disabled, only the transcription section will appear.
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+**Note:** Tags are automatically formatted for Obsidian compatibility:
+- Spaces are replaced with hyphens (e.g., "White Cat" becomes "white-cat")
+- All tags are converted to lowercase
+- Special characters are removed
+- Multiple words become hyphenated tags (e.g., #white-cat, #play)
+
+## Requirements
+
+- Obsidian v0.15.0 or higher
+- API key for your chosen provider
+- Internet connection for API calls
+
+## Limitations
+
+### File Size Limits (Model-Specific)
+- **Google Gemini**: 20MB (Flash-Lite and Flash models)
+- **OpenAI**: 25MB (all models including o4-mini)
+
+### General Limitations
+- **Audio quality** affects transcription accuracy
+- **Processing time** varies by file size, model, and provider
+- **Internet connection** required for all API calls
+
+### Provider-Specific Requirements
+- **Custom models**: User must specify accurate file size limits
+
+### Model Capabilities
+- **🤖 Smart Models** (Gemini, OpenAI o4-mini/GPT-4o):
+  - ✅ Transcription + Summarization + Tags + Diagrams
+  - 🧠 **Best choice** for smart analysis and comprehensive features
+- **🎯 Audio-Only Models** (OpenAI Whisper):
+  - ✅ Transcription only (advanced features auto-disabled)
+  - 💰 **Best choice** for basic transcription at lowest cost
+
+## Development
+
+> **Note**: This plugin was developed with the assistance of Claude Code, an AI-powered coding assistant. While the implementation prioritizes functionality and follows Obsidian plugin best practices, the code architecture reflects an iterative development approach. The plugin is fully functional and tested, though there may be opportunities for further optimization and refinement in future releases.
+
+### Commit Standards
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) to maintain a clean git history and automatically generate CHANGELOGs. We recommend using [commitizen](http://commitizen.github.io/cz-cli/) to help format your commits correctly.
+
+#### Using Commitizen (Recommended)
+
+```bash
+# Install commitizen globally
+npm install -g commitizen
+
+# Make your changes, then commit using:
+git cz
 ```
 
-## API Documentation
+This will guide you through creating a properly formatted commit message.
 
-See https://github.com/obsidianmd/obsidian-api
+#### Manual Commit Format
+
+If you prefer manual commits, follow this format:
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**Types:**
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, etc.)
+- `refactor`: Code changes that neither fix bugs nor add features
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks
+
+**Examples:**
+```bash
+git commit -m "feat(providers): add support for new Gemini model"
+git commit -m "fix(transcription): handle empty audio files gracefully"
+git commit -m "docs(readme): update API key instructions"
+```
+
+### Building from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/whisperscribe.git
+
+# Install dependencies
+npm install
+
+# Run in development mode with hot reload
+npm run dev
+
+# Build for production
+npm run build
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Quality Checks
+
+Before submitting a PR, ensure:
+
+```bash
+# All tests pass
+npm test
+```
+
+## Manual Installation
+
+1. Download `main.js`, `manifest.json`, and `styles.css` from the latest release
+2. Create a new folder in your vault's `.obsidian/plugins/` directory called `whisperscribe`
+3. Copy the downloaded files to this folder
+4. Reload Obsidian
+5. Enable the plugin in Settings > Community plugins
+
+## Contributing
+
+Contributions are welcome! Please follow our commit standards (see Development section) and ensure all tests pass before submitting a pull request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
