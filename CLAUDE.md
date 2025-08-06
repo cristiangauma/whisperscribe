@@ -210,6 +210,7 @@ git cz
 
 **Release Workflow (`release.yml`)**:
 - Triggers automatically on git tags
+- Requires `contents: write` permissions to create releases
 - Installs dependencies and builds plugin with `npm run build`
 - Creates `styles.css` if it doesn't exist
 - Validates release files for Obsidian plugin standards:
