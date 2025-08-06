@@ -70,23 +70,14 @@ jobs:
           echo "description=$(jq -r .description manifest.json)" >> $GITHUB_OUTPUT
           echo "minAppVersion=$(jq -r .minAppVersion manifest.json)" >> $GITHUB_OUTPUT
 
-      - name: Generate changelog
+      - name: Extract changelog for current version
         id: changelog
         run: |
-          # Get previous tag
-          PREVIOUS_TAG=$(git tag --sort=-version:refname | sed -n '2p')
           CURRENT_TAG=${GITHUB_REF#refs/tags/}
           
-          echo "## What's Changed" > CHANGELOG_TEMP.md
-          echo "" >> CHANGELOG_TEMP.md
-          
-          if [ -n "$PREVIOUS_TAG" ]; then
-            echo "Changes since $PREVIOUS_TAG:" >> CHANGELOG_TEMP.md
-            echo "" >> CHANGELOG_TEMP.md
-            git log --pretty=format:"- %s (%h)" ${PREVIOUS_TAG}..HEAD >> CHANGELOG_TEMP.md
-          else
-            echo "Initial release" >> CHANGELOG_TEMP.md
-          fi
+          # Extract the section for current version from CHANGELOG.md
+          # Find the section starting with "## $CURRENT_TAG" and ending before the next "## " line
+          awk "/^## $CURRENT_TAG /{flag=1; next} /^## /{flag=0} flag && /^###|^-|^[[:space:]]*$/{print}" CHANGELOG.md > CHANGELOG_TEMP.md
           
           # Set multiline output
           echo "content<<EOF" >> $GITHUB_OUTPUT
@@ -108,8 +99,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: ${{ steps.plugin-info.outputs.name }} v${{ steps.plugin-info.outputs.version }}
           body: |
-            ## ${{ steps.plugin-info.outputs.name }} v${{ steps.plugin-info.outputs.version }}
-            
             ${{ steps.plugin-info.outputs.description }}
             
             ${{ steps.changelog.outputs.content }}
@@ -127,14 +116,6 @@ jobs:
             2. Create a folder named `whisperscribe` in your vault's `.obsidian/plugins/` directory
             3. Place the downloaded files in the new folder
             4. Reload Obsidian and enable the plugin in Settings > Community Plugins
-            
-            ## Compatibility
-            
-            Minimum Obsidian version: ${{ steps.plugin-info.outputs.minAppVersion }}
-            
-            ---
-            
-            🔧 **Automated Release:** This release was automatically created when tag `${{ github.ref_name }}` was pushed.
           files: |
             whisperscribe.zip
             manifest.json
