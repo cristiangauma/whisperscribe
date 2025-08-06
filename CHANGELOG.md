@@ -1,3 +1,9 @@
+## 0.6.0 (2025-08-07)
+
+### Feat
+
+- **commitizen**: Allow commitizen to track the versions on manifest.json and versions.json to be synchronized with package.json
+
 ## 0.5.0 (2025-08-07)
 
 ## 0.4.2 (2025-08-06)
