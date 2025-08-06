@@ -68,37 +68,79 @@ jobs:
           echo "name=$(jq -r .name manifest.json)" >> $GITHUB_OUTPUT
           echo "version=$(jq -r .version manifest.json)" >> $GITHUB_OUTPUT
           echo "description=$(jq -r .description manifest.json)" >> $GITHUB_OUTPUT
+          echo "minAppVersion=$(jq -r .minAppVersion manifest.json)" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get previous tag
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | sed -n '2p')
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+          
+          echo "## What's Changed" > CHANGELOG_TEMP.md
+          echo "" >> CHANGELOG_TEMP.md
+          
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "Changes since $PREVIOUS_TAG:" >> CHANGELOG_TEMP.md
+            echo "" >> CHANGELOG_TEMP.md
+            git log --pretty=format:"- %s (%h)" ${PREVIOUS_TAG}..HEAD >> CHANGELOG_TEMP.md
+          else
+            echo "Initial release" >> CHANGELOG_TEMP.md
+          fi
+          
+          # Set multiline output
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          cat CHANGELOG_TEMP.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create plugin zip
+        run: |
+          mkdir -p dist
+          cp manifest.json main.js styles.css dist/
+          cd dist
+          zip -r ../whisperscribe.zip .
+          cd ..
+          echo "✅ Created whisperscribe.zip with plugin files"
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          name: ${{ steps.plugin-info.outputs.name }} ${{ steps.plugin-info.outputs.version }}
+          name: ${{ steps.plugin-info.outputs.name }} v${{ steps.plugin-info.outputs.version }}
           body: |
             ## ${{ steps.plugin-info.outputs.name }} v${{ steps.plugin-info.outputs.version }}
             
             ${{ steps.plugin-info.outputs.description }}
             
-            ### Installation
+            ${{ steps.changelog.outputs.content }}
             
-            **Manual Installation:**
-            1. Download the `manifest.json`, `main.js` and `styles.css` files from this release
-            2. Create a new folder in your vault's `.obsidian/plugins/` directory named `whisperscribe`
+            ## Installation
+            
+            ### Option 1: Download ZIP (Recommended)
+            1. Download `whisperscribe.zip` from this release
+            2. Extract the zip file
+            3. Copy the extracted folder to your vault's `.obsidian/plugins/` directory
+            4. Reload Obsidian and enable the plugin in Settings > Community Plugins
+            
+            ### Option 2: Manual Installation
+            1. Download `manifest.json`, `main.js`, and `styles.css` from this release
+            2. Create a folder named `whisperscribe` in your vault's `.obsidian/plugins/` directory
             3. Place the downloaded files in the new folder
-            4. Enable the plugin in Obsidian's settings under Community Plugins
+            4. Reload Obsidian and enable the plugin in Settings > Community Plugins
             
-            ### Compatibility
+            ## Compatibility
             
-            Minimum Obsidian version: $(jq -r .minAppVersion manifest.json)
+            Minimum Obsidian version: ${{ steps.plugin-info.outputs.minAppVersion }}
             
             ---
             
             🔧 **Automated Release:** This release was automatically created when tag `${{ github.ref_name }}` was pushed.
           files: |
+            whisperscribe.zip
             manifest.json
             main.js
             styles.css
-          generate_release_notes: true
+          generate_release_notes: false
           draft: false
           prerelease: false
 
