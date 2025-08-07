@@ -1,3 +1,9 @@
+## 0.8.0 (2025-08-07)
+
+### Feat
+
+- **license**: Change license to the correct one (AGPLv3)
+
 ## 0.7.0 (2025-08-07)
 
 ## 0.6.5 (2025-08-07)
