@@ -1,7 +1,5 @@
 # WhisperScribe Plugin for Obsidian
 
-[![CI](https://github.com/cristiangauma/whisperscribe/workflows/CI/badge.svg)](https://github.com/cristiangauma/whisperscribe/actions/workflows/ci.yml)
-
 Transcribe audio files directly in your Obsidian notes using Google Gemini or OpenAI.
 
 ## Features
