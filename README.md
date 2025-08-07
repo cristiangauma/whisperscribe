@@ -141,82 +141,7 @@ When all optional features are disabled, only the transcription section will app
 
 ## Development
 
-> **Note**: This plugin was developed with the assistance of Claude Code, an AI-powered coding assistant. While the implementation prioritizes functionality and follows Obsidian plugin best practices, the code architecture reflects an iterative development approach. The plugin is fully functional and tested, though there may be opportunities for further optimization and refinement in future releases.
-
-### Commit Standards
-
-This project uses [Conventional Commits](https://www.conventionalcommits.org/) to maintain a clean git history and automatically generate CHANGELOGs. We recommend using [commitizen](http://commitizen.github.io/cz-cli/) to help format your commits correctly.
-
-#### Using Commitizen (Recommended)
-
-```bash
-# Install commitizen globally
-npm install -g commitizen
-
-# Make your changes, then commit using:
-git cz
-```
-
-This will guide you through creating a properly formatted commit message.
-
-#### Manual Commit Format
-
-If you prefer manual commits, follow this format:
-
-```
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
-```
-
-**Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, etc.)
-- `refactor`: Code changes that neither fix bugs nor add features
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
-
-**Examples:**
-```bash
-git commit -m "feat(providers): add support for new Gemini model"
-git commit -m "fix(transcription): handle empty audio files gracefully"
-git commit -m "docs(readme): update API key instructions"
-```
-
-### Building from Source
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/whisperscribe.git
-
-# Install dependencies
-npm install
-
-# Run in development mode with hot reload
-npm run dev
-
-# Build for production
-npm run build
-
-# Run tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-```
-
-### Quality Checks
-
-Before submitting a PR, ensure:
-
-```bash
-# All tests pass
-npm test
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, build and test commands, commit standards, and PR guidelines.
 
 ## Manual Installation
 
@@ -228,7 +153,7 @@ npm test
 
 ## Contributing
 
-Contributions are welcome! Please follow our commit standards (see Development section) and ensure all tests pass before submitting a pull request.
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## License
 

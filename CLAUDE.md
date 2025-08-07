@@ -192,10 +192,10 @@ chore(deps): update Obsidian API to latest version
 ```
 
 ### Using Commitizen
-For guided commit message creation:
+For guided commit message creation (Python Commitizen via pipx):
 ```bash
-npm install -g commitizen
-git cz
+pipx install commitizen
+cz commit
 ```
 
 ## CI/CD Workflows
