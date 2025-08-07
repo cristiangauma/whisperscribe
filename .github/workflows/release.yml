@@ -6,8 +6,13 @@ on:
       - '*'
 
 jobs:
+  # Run tests and security checks first
+  test-and-security:
+    uses: ./.github/workflows/test-and-security.yml
+
   release:
     name: Create Release
+    needs: test-and-security  # Only run if tests pass
     runs-on: ubuntu-latest
     permissions:
       contents: write
