@@ -1,3 +1,9 @@
+## 0.9.0 (2025-08-07)
+
+### Feat
+
+- **gitignore**: Add coverage directory to gitignore
+
 ## 0.8.0 (2025-08-07)
 
 ### Feat
