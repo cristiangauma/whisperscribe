@@ -1,3 +1,9 @@
+## 0.11.0 (2025-08-07)
+
+### Feat
+
+- **gpt5**: Change o4/gpt4 to the new GPT5 for the transcriptions, summaries, tags and diagrams for OpenAI provider
+
 ## 0.10.0 (2025-08-07)
 
 ## 0.9.0 (2025-08-07)
