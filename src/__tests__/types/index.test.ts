@@ -14,7 +14,7 @@ describe('types', () => {
 
     it('should have valid default models', () => {
       expect(DEFAULT_SETTINGS.modelName).toBe('gemini-2.5-flash-lite');
-      expect(DEFAULT_SETTINGS.openaiModel).toBe('o4-mini-2025-04-16');
+      expect(DEFAULT_SETTINGS.openaiModel).toBe('gpt-5-nano');
     });
 
     it('should have conservative defaults for features', () => {

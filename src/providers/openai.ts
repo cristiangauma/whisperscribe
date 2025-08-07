@@ -28,9 +28,11 @@ export async function transcribeWithOpenAI(
 	const arrayBuffer = await app.vault.readBinary(file);
 	const blob = new Blob([arrayBuffer], { type: getMimeType(file.extension) });
 	
+	// Use Whisper for audio-only models, GPT-5 for generalist models
+	const isWhisperModel = settings.openaiModel === 'whisper-1';
 	const formData = new FormData();
 	formData.append('file', blob, file.name);
-	formData.append('model', settings.openaiModel);
+	formData.append('model', isWhisperModel ? 'whisper-1' : settings.openaiModel);
 	// Anti-hallucination prompt for Whisper
 	formData.append('prompt', 'Transcribe clearly audible speech only. Ignore background music, noise, and silence. Do not repeat words or create repetitive patterns. Use [unclear] for inaudible sections.');
 	// Additional parameters to reduce hallucinations
@@ -105,7 +107,7 @@ async function generateExtrasWithOpenAI(
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
-			model: 'gpt-3.5-turbo',
+			model: settings.openaiModel.startsWith('gpt-5') ? settings.openaiModel : 'gpt-3.5-turbo',
 			messages: [
 				...(settings.summaryLanguage && settings.summaryLanguage !== 'same-as-audio' && settings.summaryLanguage !== 'separator' ? [{
 					role: 'system',

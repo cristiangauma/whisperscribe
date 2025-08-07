@@ -28,9 +28,9 @@ WhisperScribe supports either Google Gemini or OpenAI providers for comprehensiv
 
 ### 🤖 OpenAI
 **Capabilities:** ✅ Transcription, ✅ Summarization, ✅ Tags, ✅ Diagrams  
-**Popular Models:** o4-mini-2025-04-16 (recommended), whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe  
+**Popular Models:** gpt-5-nano (recommended), gpt-5-mini, gpt-5, whisper-1, o4-mini  
 📚 [View all OpenAI models](https://platform.openai.com/docs/models)  
-*Note: o4-mini provides the best smart analysis at low cost*
+*Note: GPT-5 Nano provides ultra-fast, cost-effective transcription at $0.05/1M input tokens*
 
 
 ## Installation
@@ -119,7 +119,7 @@ When all optional features are disabled, only the transcription section will app
 
 ### File Size Limits (Model-Specific)
 - **Google Gemini**: 20MB (Flash-Lite and Flash models)
-- **OpenAI**: 25MB (all models including o4-mini)
+- **OpenAI**: 25MB (all models including GPT-5)
 
 ### General Limitations
 - **Audio quality** affects transcription accuracy
@@ -130,9 +130,10 @@ When all optional features are disabled, only the transcription section will app
 - **Custom models**: User must specify accurate file size limits
 
 ### Model Capabilities
-- **🤖 Smart Models** (Gemini, OpenAI o4-mini/GPT-4o):
+- **🤖 Smart Models** (Gemini, OpenAI GPT-5/o4-mini/GPT-4o):
   - ✅ Transcription + Summarization + Tags + Diagrams
   - 🧠 **Best choice** for smart analysis and comprehensive features
+  - 💡 **GPT-5 Nano** offers the best price/performance ratio
 - **🎯 Audio-Only Models** (OpenAI Whisper):
   - ✅ Transcription only (advanced features auto-disabled)
   - 💰 **Best choice** for basic transcription at lowest cost

@@ -41,7 +41,7 @@ export const DEFAULT_SETTINGS: AITranscriptionSettings = {
 	apiKey: '',
 	modelName: 'gemini-2.5-flash-lite',
 	openaiApiKey: '',
-	openaiModel: 'o4-mini-2025-04-16',
+	openaiModel: 'gpt-5-nano',
 	includeSummary: false,
 	summaryLength: 'bullet',
 	proposeTags: false,
@@ -77,6 +77,27 @@ export const PROVIDER_MODELS: Record<AIProvider, ModelConfig[]> = {
 	],
 	openai: [
 		{
+			name: 'GPT-5 Nano (Recommended)',
+			id: 'gpt-5-nano',
+			fileSizeLimitMB: 25,
+			supportsAdvancedFeatures: true,
+			description: 'Ultra-low cost & fast - best for transcription ($0.05/1M input)'
+		},
+		{
+			name: 'GPT-5 Mini',
+			id: 'gpt-5-mini',
+			fileSizeLimitMB: 25,
+			supportsAdvancedFeatures: true,
+			description: 'Balanced performance & cost - 5x cheaper than GPT-5 standard'
+		},
+		{
+			name: 'GPT-5',
+			id: 'gpt-5',
+			fileSizeLimitMB: 25,
+			supportsAdvancedFeatures: true,
+			description: 'Premium model - best for complex reasoning & multi-step tasks'
+		},
+		{
 			name: 'Whisper-1 (Audio Only)',
 			id: 'whisper-1',
 			fileSizeLimitMB: 25,
@@ -84,25 +105,25 @@ export const PROVIDER_MODELS: Record<AIProvider, ModelConfig[]> = {
 			description: 'OpenAI\'s dedicated audio transcription model (no AI features)'
 		},
 		{
-			name: 'o4-mini (Recommended)',
+			name: 'o4-mini',
 			id: 'o4-mini-2025-04-16',
 			fileSizeLimitMB: 25,
 			supportsAdvancedFeatures: true,
-			description: 'Latest reasoning model - best smart analysis at low cost (90% cheaper than o3)'
+			description: 'Previous generation reasoning model - now superseded by GPT-5'
 		},
 		{
 			name: 'GPT-4o Mini',
 			id: 'gpt-4o-mini-transcribe',
 			fileSizeLimitMB: 25,
 			supportsAdvancedFeatures: true,
-			description: 'Previous generation - good but o4-mini is smarter and cheaper'
+			description: 'Legacy model - consider GPT-5 Nano for better performance & cost'
 		},
 		{
 			name: 'GPT-4o',
 			id: 'gpt-4o-transcribe',
 			fileSizeLimitMB: 25,
 			supportsAdvancedFeatures: true,
-			description: 'Premium model - more expensive than o4-mini with similar capabilities'
+			description: 'Legacy premium model - GPT-5 offers superior capabilities'
 		},
 		{
 			name: 'Custom Model',
