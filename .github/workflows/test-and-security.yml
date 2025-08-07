@@ -39,8 +39,10 @@ jobs:
 
       - name: Install gitleaks
         run: |
-          curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 -o /usr/local/bin/gitleaks
-          chmod +x /usr/local/bin/gitleaks
+          mkdir -p $HOME/.local/bin
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 -o $HOME/.local/bin/gitleaks
+          chmod +x $HOME/.local/bin/gitleaks
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Scan for secrets (full history)
-        run: gitleaks detect --no-banner --redact --verbose --log-level warn --source .
+        run: $HOME/.local/bin/gitleaks detect --no-banner --redact --verbose --log-level warn --source .
