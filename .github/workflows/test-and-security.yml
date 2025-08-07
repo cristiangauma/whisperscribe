@@ -3,6 +3,9 @@ name: Tests and Security Checks
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Run Tests
