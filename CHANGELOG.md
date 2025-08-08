@@ -1,3 +1,9 @@
+## 0.12.1 (2025-08-08)
+
+### Refactor
+
+- **guidelines-compliance**: Ensure the plugin follows Obsidian Plugin Guidelines
+
 ## 0.12.0 (2025-08-08)
 
 ### Feat
