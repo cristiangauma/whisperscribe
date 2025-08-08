@@ -1,3 +1,9 @@
+## 0.12.0 (2025-08-08)
+
+### Feat
+
+- **gpt5**: Better prompt for diagrams on GPT5 and deleted o4/gpt4 OpenAI models
+
 ## 0.11.0 (2025-08-07)
 
 ### Feat
