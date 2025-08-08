@@ -77,61 +77,40 @@ export const PROVIDER_MODELS: Record<AIProvider, ModelConfig[]> = {
 	],
 	openai: [
 		{
-			name: 'GPT-5 Nano (Recommended)',
+			name: 'Whisper + GPT-5 Nano (Recommended)',
 			id: 'gpt-5-nano',
 			fileSizeLimitMB: 25,
 			supportsAdvancedFeatures: true,
-			description: 'Ultra-low cost & fast - best for transcription ($0.05/1M input)'
+			description: 'Whisper transcribes (cheap, all formats) + GPT-5 Nano for summaries/tags/diagrams'
 		},
 		{
-			name: 'GPT-5 Mini',
+			name: 'Whisper + GPT-5 Mini',
 			id: 'gpt-5-mini',
 			fileSizeLimitMB: 25,
 			supportsAdvancedFeatures: true,
-			description: 'Balanced performance & cost - 5x cheaper than GPT-5 standard'
+			description: 'Whisper transcribes + GPT-5 Mini for advanced features (balanced cost & performance)'
 		},
 		{
-			name: 'GPT-5',
+			name: 'Whisper + GPT-5',
 			id: 'gpt-5',
 			fileSizeLimitMB: 25,
 			supportsAdvancedFeatures: true,
-			description: 'Premium model - best for complex reasoning & multi-step tasks'
+			description: 'Whisper transcribes + GPT-5 for advanced features (premium reasoning & analysis)'
 		},
 		{
-			name: 'Whisper-1 (Audio Only)',
+			name: 'Whisper-1 (Transcription Only)',
 			id: 'whisper-1',
 			fileSizeLimitMB: 25,
 			supportsAdvancedFeatures: false,
-			description: 'OpenAI\'s dedicated audio transcription model (no AI features)'
+			description: 'OpenAI Whisper only - transcription without summaries/tags/diagrams'
 		},
 		{
-			name: 'o4-mini',
-			id: 'o4-mini-2025-04-16',
-			fileSizeLimitMB: 25,
-			supportsAdvancedFeatures: true,
-			description: 'Previous generation reasoning model - now superseded by GPT-5'
-		},
-		{
-			name: 'GPT-4o Mini',
-			id: 'gpt-4o-mini-transcribe',
-			fileSizeLimitMB: 25,
-			supportsAdvancedFeatures: true,
-			description: 'Legacy model - consider GPT-5 Nano for better performance & cost'
-		},
-		{
-			name: 'GPT-4o',
-			id: 'gpt-4o-transcribe',
-			fileSizeLimitMB: 25,
-			supportsAdvancedFeatures: true,
-			description: 'Legacy premium model - GPT-5 offers superior capabilities'
-		},
-		{
-			name: 'Custom Model',
+			name: 'Whisper + Custom Model',
 			id: 'custom',
 			fileSizeLimitMB: 25,
 			isCustom: true,
 			supportsAdvancedFeatures: true,
-			description: 'Specify your own OpenAI model with custom file size limit'
+			description: 'Whisper transcribes + your custom OpenAI model for advanced features'
 		}
 	]
 };
@@ -147,6 +126,6 @@ export const AI_PROVIDERS = {
 		name: 'OpenAI',
 		docsUrl: 'https://platform.openai.com/docs/models',
 		isGeneralist: true,
-		description: 'Powerful language models with strong text processing capabilities'
+		description: 'Hybrid approach: Whisper for transcription (cheap, all formats) + chosen model for analysis'
 	}
 };

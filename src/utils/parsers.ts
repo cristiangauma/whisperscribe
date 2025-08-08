@@ -5,9 +5,9 @@
 import { formatTagsAsObsidianTags } from './formatters.js';
 
 /**
- * Parse Claude/AssemblyAI LeMUR response to extract structured content
+ * Parse AI response to extract structured content (used by OpenAI for consistency)
  * 
- * @param response - Raw response string from Claude/LeMUR
+ * @param response - Raw response string from AI provider
  * @returns Parsed object with optional summary, tags, and diagram
  */
 export function parseClaudeResponse(response: string): {summary?: string, tags?: string[], diagram?: string} {

@@ -12,14 +12,13 @@ This directory contains utility functions extracted from the main plugin file to
 
 ### `parsers.ts`
 **Response parsing utilities for AI providers**
-- `parseClaudeResponse(response: string)` - Parses Claude/AssemblyAI LeMUR responses
+- `parseClaudeResponse(response: string)` - Parses AI responses with structured content
 - `parseGeneralResponse(responseText: string, includeFeatures: boolean)` - Parses general AI provider responses
 
 ### `prompts.ts`
 **Prompt generation utilities**
 - `getSummaryPrompt(summaryLength: string)` - Generates summary prompt descriptions
 - `getTranscriptionPrompt(settings: PromptSettings)` - Creates comprehensive transcription prompts
-- `buildClaudePrompt(settings: PromptSettings)` - Builds Claude-specific prompts for LeMUR
 - `generateOpenAIExtrasPrompt(settings: PromptSettings, transcription: string)` - Creates OpenAI extras prompts
 
 ### `providers.ts`

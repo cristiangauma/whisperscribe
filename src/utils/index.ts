@@ -20,7 +20,6 @@ export {
 export {
 	getSummaryPrompt,
 	getTranscriptionPrompt,
-	buildClaudePrompt,
 	generateOpenAIExtrasPrompt
 } from './prompts.js';
 

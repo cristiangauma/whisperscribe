@@ -1,7 +1,6 @@
 import { 
   getSummaryPrompt, 
   getTranscriptionPrompt, 
-  buildClaudePrompt,
   generateOpenAIExtrasPrompt 
 } from '../../utils/prompts';
 import { AITranscriptionSettings } from '../../types';
@@ -102,47 +101,6 @@ describe('prompts', () => {
     });
   });
 
-  describe('buildClaudePrompt', () => {
-    const transcription = 'This is the transcribed text from the audio.';
-
-    it('should build complete prompt with all features', () => {
-      const prompt = buildClaudePrompt(mockSettings);
-      
-      expect(prompt).toContain('Please provide');
-      expect(prompt).toContain('SUMMARY:');
-      expect(prompt).toContain('TAGS:');
-      expect(prompt).toContain('DIAGRAM:');
-    });
-
-    it('should only request enabled features', () => {
-      const settings = {
-        ...mockSettings,
-        includeSummary: true,
-        proposeTags: false,
-        generateDiagram: false
-      };
-      
-      const prompt = buildClaudePrompt(settings);
-      
-      expect(prompt).toContain('SUMMARY:');
-      expect(prompt).not.toContain('TAGS:');
-      expect(prompt).not.toContain('DIAGRAM:');
-    });
-
-    it('should handle bullet point summaries correctly', () => {
-      const settings = { ...mockSettings, summaryLength: 'bullet' };
-      const prompt = buildClaudePrompt(settings);
-      
-      expect(prompt).toContain('bullet points');
-      expect(prompt).toContain('a maximum of 5');
-    });
-
-    it('should include proper formatting instructions', () => {
-      const prompt = buildClaudePrompt(mockSettings);
-      
-      expect(prompt).toContain('Format your response as:');
-    });
-  });
 
   describe('generateOpenAIExtrasPrompt', () => {
     const transcription = 'This is the transcribed text.';
@@ -227,13 +185,6 @@ describe('prompts', () => {
       expect(customPrompt).toContain('in Esperanto');
     });
 
-    it('should include language instructions in Claude prompts', () => {
-      const frenchSettings = { ...mockSettings, summaryLanguage: 'french' as const };
-      const prompt = buildClaudePrompt(frenchSettings);
-      
-      expect(prompt).toContain('in French');
-      expect(prompt).toContain('You MUST provide ALL outputs (summary, tags, and diagram labels) ONLY in French');
-    });
 
     it('should include language instructions in OpenAI extras prompts', () => {
       const catalanSettings = { ...mockSettings, summaryLanguage: 'catalan' as const };

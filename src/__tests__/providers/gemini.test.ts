@@ -25,18 +25,12 @@ describe('transcribeWithGemini', () => {
     modelName: 'gemini-1.5-flash',
     openaiApiKey: '',
     openaiModel: '',
-    anthropicApiKey: '',
-    anthropicModel: '',
-    azureApiKey: '',
-    azureEndpoint: '',
-    azureDeploymentName: '',
-    deepgramApiKey: '',
-    deepgramModel: '',
-    assemblyaiApiKey: '',
     includeSummary: true,
     summaryLength: 'medium',
     proposeTags: true,
-    generateDiagram: true
+    generateDiagram: true,
+    summaryLanguage: 'same-as-audio',
+    customLanguage: ''
   };
 
   const mockFile = new TFile('test.mp3', 'mp3', 1024);

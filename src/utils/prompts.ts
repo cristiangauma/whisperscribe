@@ -169,9 +169,9 @@ export function getTranscriptionPrompt(settings: PromptSettings): string {
 		
 		if (settings.generateDiagram) {
 			if (settings.summaryLanguage === 'same-as-audio' || settings.summaryLanguage === 'separator') {
-				parts.push("\n- A Mermaid diagram (flowchart TD format) that organizes the main ideas and their relationships from top to bottom. Use clear, concise node labels and logical connections. Keep it simple with 5-10 nodes maximum. Label nodes in the same language as the audio.");
+				parts.push("\n- A Mermaid diagram (flowchart TD format) that organizes the main ideas and their relationships from top to bottom. Use clear, concise node labels and logical connections. Keep it simple with 5-10 nodes maximum. Label nodes in the same language as the audio. CRITICAL: Use proper Mermaid syntax with square brackets around node labels like A[Node Label], B[Another Node], etc. Node labels must use only letters, numbers, spaces, and hyphens - no parentheses, quotes, or special characters.");
 			} else {
-				parts.push(`\n- A Mermaid diagram (flowchart TD format) that organizes the main ideas and their relationships from top to bottom. Use clear, concise node labels${langInstruction} and logical connections. Keep it simple with 5-10 nodes maximum.`);
+				parts.push(`\n- A Mermaid diagram (flowchart TD format) that organizes the main ideas and their relationships from top to bottom. Use clear, concise node labels${langInstruction} and logical connections. Keep it simple with 5-10 nodes maximum. CRITICAL: Use proper Mermaid syntax with square brackets around node labels like A[Node Label], B[Another Node], etc. Node labels must use only letters, numbers, spaces, and hyphens - no parentheses, quotes, or special characters.`);
 			}
 		}
 		
@@ -199,64 +199,6 @@ export function getTranscriptionPrompt(settings: PromptSettings): string {
 	return parts.join("");
 }
 
-/**
- * Build Claude-specific prompt for AssemblyAI LeMUR integration
- * 
- * @param settings - Plugin settings to determine which features to include
- * @returns Prompt string for Claude processing via LeMUR
- */
-export function buildClaudePrompt(settings: PromptSettings): string {
-	const parts = [];
-	const langInstruction = getLanguageInstruction(settings.summaryLanguage, settings.customLanguage);
-	
-	// Add strong language instruction if not "same-as-audio" or "separator"
-	const strongLangInstruction = getStrongLanguageInstruction(settings.summaryLanguage, settings.customLanguage);
-	if (strongLangInstruction && settings.summaryLanguage !== 'same-as-audio' && settings.summaryLanguage !== 'separator' && 
-	    (settings.includeSummary || settings.proposeTags || settings.generateDiagram)) {
-		parts.push(strongLangInstruction);
-		parts.push(`Remember: ALL outputs MUST be${langInstruction} ONLY.`);
-	}
-	
-	if (settings.includeSummary) {
-		const summaryPrompt = getSummaryPrompt(settings.summaryLength);
-		if (settings.summaryLanguage === 'same-as-audio' || settings.summaryLanguage === 'separator') {
-			parts.push(`Please provide ${summaryPrompt} of this transcription in the same language as the transcription.`);
-		} else {
-			parts.push(`Please provide ${summaryPrompt} of this transcription${langInstruction}.`);
-		}
-	}
-	
-	if (settings.proposeTags) {
-		if (settings.summaryLanguage === 'same-as-audio' || settings.summaryLanguage === 'separator') {
-			parts.push('Also provide a maximum of 5 relevant tags for categorizing this content (use simple words, avoid spaces) in the same language as the transcription.');
-		} else {
-			parts.push(`Also provide a maximum of 5 relevant tags for categorizing this content (use simple words, avoid spaces)${langInstruction}.`);
-		}
-	}
-	
-	if (settings.generateDiagram) {
-		if (settings.summaryLanguage === 'same-as-audio' || settings.summaryLanguage === 'separator') {
-			parts.push('Create a Mermaid diagram (flowchart TD format) that organizes the main ideas and their relationships from top to bottom. Use clear, concise node labels in the same language as the transcription and logical connections. Keep it simple with 5-10 nodes maximum.');
-		} else {
-			parts.push(`Create a Mermaid diagram (flowchart TD format) that organizes the main ideas and their relationships from top to bottom. Use clear, concise node labels${langInstruction} and logical connections. Keep it simple with 5-10 nodes maximum.`);
-		}
-	}
-	
-	if (settings.includeSummary || settings.proposeTags || settings.generateDiagram) {
-		parts.push('\n\nFormat your response as:');
-		if (settings.includeSummary) {
-			parts.push(`\nSUMMARY:\n[${settings.summaryLength === 'bullet' ? 'bullet points' : 'summary'}]`);
-		}
-		if (settings.proposeTags) {
-			parts.push('\nTAGS:\n[tag1, tag2, tag3, ...]');
-		}
-		if (settings.generateDiagram) {
-			parts.push('\nDIAGRAM:\n[mermaid flowchart TD code without backticks]');
-		}
-	}
-	
-	return parts.join(' ');
-}
 
 /**
  * Generate OpenAI-specific extras prompt for post-transcription processing
@@ -296,9 +238,9 @@ export function generateOpenAIExtrasPrompt(settings: PromptSettings, transcripti
 	
 	if (settings.generateDiagram) {
 		if (settings.summaryLanguage === 'same-as-audio' || settings.summaryLanguage === 'separator') {
-			parts.push('Create a Mermaid diagram (flowchart TD format) that organizes the main ideas and their relationships from top to bottom. Use clear, concise node labels in the same language as the transcription and logical connections. Keep it simple with 5-10 nodes maximum.');
+			parts.push('Create a Mermaid diagram (flowchart TD format) that organizes the main ideas and their relationships from top to bottom. Use clear, concise node labels in the same language as the transcription and logical connections. Keep it simple with 5-10 nodes maximum. CRITICAL: Use proper Mermaid syntax with square brackets around node labels like A[Node Label], B[Another Node], etc. Node labels must use only letters, numbers, spaces, and hyphens - no parentheses, quotes, or special characters.');
 		} else {
-			parts.push(`Create a Mermaid diagram (flowchart TD format) that organizes the main ideas and their relationships from top to bottom. Use clear, concise node labels${langInstruction} and logical connections. Keep it simple with 5-10 nodes maximum.`);
+			parts.push(`Create a Mermaid diagram (flowchart TD format) that organizes the main ideas and their relationships from top to bottom. Use clear, concise node labels${langInstruction} and logical connections. Keep it simple with 5-10 nodes maximum. CRITICAL: Use proper Mermaid syntax with square brackets around node labels like A[Node Label], B[Another Node], etc. Node labels must use only letters, numbers, spaces, and hyphens - no parentheses, quotes, or special characters.`);
 		}
 	}
 	

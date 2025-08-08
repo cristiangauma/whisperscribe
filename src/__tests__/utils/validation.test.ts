@@ -13,11 +13,13 @@ describe('validation', () => {
     apiKey: 'google-key',
     modelName: 'gemini-2.5-flash-lite', // Updated to match PROVIDER_MODELS
     openaiApiKey: 'openai-key',
-    openaiModel: 'o4-mini-2025-04-16',
+    openaiModel: 'gpt-5-nano',
     includeSummary: false,
     summaryLength: 'medium',
     proposeTags: false,
-    generateDiagram: false
+    generateDiagram: false,
+    summaryLanguage: 'same-as-audio',
+    customLanguage: ''
   };
 
   describe('getApiKeyForProvider', () => {
@@ -40,7 +42,7 @@ describe('validation', () => {
   describe('getModelForProvider', () => {
     it('should return correct model for each provider', () => {
       expect(getModelForProvider('google', mockSettings)).toBe('gemini-2.5-flash-lite');
-      expect(getModelForProvider('openai', mockSettings)).toBe('o4-mini-2025-04-16');
+      expect(getModelForProvider('openai', mockSettings)).toBe('gpt-5-nano');
     });
 
     it('should throw error for unknown provider', () => {

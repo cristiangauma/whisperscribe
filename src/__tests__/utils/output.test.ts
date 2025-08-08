@@ -12,18 +12,12 @@ describe('output', () => {
     modelName: 'test',
     openaiApiKey: '',
     openaiModel: '',
-    anthropicApiKey: '',
-    anthropicModel: '',
-    azureApiKey: '',
-    azureEndpoint: '',
-    azureDeploymentName: '',
-    deepgramApiKey: '',
-    deepgramModel: '',
-    assemblyaiApiKey: '',
     includeSummary: true,
     summaryLength: 'medium',
     proposeTags: true,
-    generateDiagram: true
+    generateDiagram: true,
+    summaryLanguage: 'same-as-audio',
+    customLanguage: ''
   };
 
   describe('formatTranscriptionOutput', () => {
