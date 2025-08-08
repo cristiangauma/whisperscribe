@@ -108,7 +108,6 @@ export async function transcribeWithGemini(
 		
 		// If hallucination was detected, add a note to the result
 		if (hadHallucination) {
-			console.warn('WhisperScribe: Repetitive patterns detected and cleaned from transcription');
 			// Add a subtle note that doesn't interfere with the transcription
 			parsedResult.transcription += '\n\n*[Note: Some repetitive content was automatically cleaned from this transcription]*';
 		}

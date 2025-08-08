@@ -90,7 +90,6 @@ export default class AITranscriptionPlugin extends Plugin {
 			
 			new Notice('Transcription completed!');
 		} catch (error) {
-			console.error('Transcription error:', error);
 			new Notice(`Transcription failed: ${error.message}`);
 		}
 	}

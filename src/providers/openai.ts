@@ -3,7 +3,7 @@
  * Uses Whisper API for transcription (cheap, supports many formats) + selected model for advanced features
  */
 
-import { TFile } from 'obsidian';
+import { TFile, requestUrl } from 'obsidian';
 import type { TranscriptionResult, AITranscriptionSettings } from '../types/index.js';
 import {
 	getMimeType,
@@ -60,6 +60,8 @@ async function transcribeWithWhisper(
 	
 	const apiUrl = 'https://api.openai.com/v1/audio/transcriptions';
 	
+	// Note: Using fetch here because requestUrl doesn't support FormData
+	// This is the only case where we need FormData for file upload to Whisper API
 	const response = await fetch(apiUrl, {
 		method: 'POST',
 		headers: {
@@ -82,7 +84,6 @@ async function transcribeWithWhisper(
 	
 	// If hallucination was detected, add a note
 	if (hadHallucination) {
-		console.warn('WhisperScribe: Repetitive patterns detected and cleaned from OpenAI transcription');
 		transcription += '\n\n*[Note: Some repetitive content was automatically cleaned from this transcription]*';
 	}
 	
@@ -116,7 +117,8 @@ async function generateExtrasWithOpenAI(
 	
 	const apiUrl = 'https://api.openai.com/v1/chat/completions';
 	
-	const response = await fetch(apiUrl, {
+	const response = await requestUrl({
+		url: apiUrl,
 		method: 'POST',
 		headers: {
 			'Authorization': `Bearer ${settings.openaiApiKey}`,
@@ -151,11 +153,11 @@ async function generateExtrasWithOpenAI(
 		})
 	});
 	
-	if (!response.ok) {
+	if (response.status >= 400) {
 		throw new Error('Failed to generate summary with OpenAI');
 	}
 	
-	const data = await response.json();
+	const data = response.json;
 	const responseContent = data.choices[0].message.content;
 	
 	// Parse using the same logic as Claude responses

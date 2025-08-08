@@ -2,9 +2,18 @@ import { transcribeWithOpenAI } from '../../providers/openai';
 import { TFile } from 'obsidian';
 import { AITranscriptionSettings } from '../../types';
 
-// Mock fetch
-const mockFetch = jest.fn();
-global.fetch = mockFetch;
+// Mock both requestUrl and fetch
+jest.mock('obsidian', () => ({
+  ...jest.requireActual('obsidian'),
+  requestUrl: jest.fn()
+}));
+
+// Mock global fetch
+global.fetch = jest.fn();
+
+import { requestUrl } from 'obsidian';
+const mockRequestUrl = requestUrl as jest.MockedFunction<typeof requestUrl>;
+const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
 
 // Mock app
 const mockApp = {
@@ -37,18 +46,19 @@ describe('transcribeWithOpenAI (Hybrid: Whisper + Selected Model)', () => {
   });
 
   it('should transcribe with Whisper and generate extras with selected model', async () => {
-    // Mock Whisper transcription response
+    // Mock Whisper transcription response (fetch)
     const whisperResponse = {
       ok: true,
+      status: 200,
       json: async () => ({
         text: 'This is the transcribed audio content from Whisper.'
       })
     };
 
-    // Mock ChatGPT extras response
+    // Mock ChatGPT extras response (requestUrl)
     const chatgptResponse = {
-      ok: true,
-      json: async () => ({
+      status: 200,
+      json: {
         choices: [{
           message: {
             content: `SUMMARY:
@@ -63,12 +73,11 @@ graph TD
   B --> C[ChatGPT]`
           }
         }]
-      })
+      }
     };
 
-    mockFetch
-      .mockResolvedValueOnce(whisperResponse)  // Whisper call
-      .mockResolvedValueOnce(chatgptResponse); // ChatGPT call
+    mockFetch.mockResolvedValueOnce(whisperResponse as any);  // Whisper call uses fetch
+    mockRequestUrl.mockResolvedValueOnce(chatgptResponse);    // ChatGPT call uses requestUrl
 
     const result = await transcribeWithOpenAI(mockFile, mockSettings, mockApp);
 
@@ -77,18 +86,19 @@ graph TD
     expect(result.tags).toEqual(['audio', 'transcription', 'openai']);
     expect(result.diagram).toContain('graph TD');
 
-    // Verify two API calls were made
-    expect(mockFetch).toHaveBeenCalledTimes(2);
+    // Verify two API calls were made - one fetch, one requestUrl
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockRequestUrl).toHaveBeenCalledTimes(1);
 
-    // Verify Whisper API call
+    // Verify Whisper API call (fetch)
     const [whisperUrl, whisperOptions] = mockFetch.mock.calls[0];
     expect(whisperUrl).toContain('openai.com/v1/audio/transcriptions');
     expect(whisperOptions.method).toBe('POST');
     expect(whisperOptions.headers.Authorization).toBe('Bearer test-openai-key');
 
-    // Verify ChatGPT API call
-    const [chatUrl, chatOptions] = mockFetch.mock.calls[1];
-    expect(chatUrl).toContain('openai.com/v1/chat/completions');
+    // Verify ChatGPT API call (requestUrl)
+    const [chatOptions] = mockRequestUrl.mock.calls[0];
+    expect(chatOptions.url).toContain('openai.com/v1/chat/completions');
     expect(chatOptions.method).toBe('POST');
   });
 
@@ -102,12 +112,13 @@ graph TD
 
     const whisperResponse = {
       ok: true,
+      status: 200,
       json: async () => ({
         text: 'Only transcription from Whisper.'
       })
     };
 
-    mockFetch.mockResolvedValueOnce(whisperResponse);
+    mockFetch.mockResolvedValueOnce(whisperResponse as any);
 
     const result = await transcribeWithOpenAI(mockFile, settingsNoExtras, mockApp);
 
@@ -116,8 +127,9 @@ graph TD
     expect(result.tags).toBeUndefined();
     expect(result.diagram).toBeUndefined();
 
-    // Should only make one API call (Whisper)
+    // Should only make one API call (Whisper using fetch)
     expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockRequestUrl).toHaveBeenCalledTimes(0);
   });
 
   it('should handle Whisper API errors', async () => {
@@ -130,7 +142,7 @@ graph TD
       })
     };
 
-    mockFetch.mockResolvedValueOnce(whisperResponse);
+    mockFetch.mockResolvedValueOnce(whisperResponse as any);
 
     await expect(transcribeWithOpenAI(mockFile, mockSettings, mockApp))
       .rejects.toThrow('Whisper API request failed: 401 Unauthorized');
@@ -139,23 +151,22 @@ graph TD
   it('should handle ChatGPT API errors gracefully', async () => {
     const whisperResponse = {
       ok: true,
+      status: 200,
       json: async () => ({
         text: 'Transcription successful.'
       })
     };
 
     const chatgptResponse = {
-      ok: false,
       status: 429,
       statusText: 'Rate Limit Exceeded',
-      json: async () => ({
+      json: {
         error: { message: 'Rate limit exceeded' }
-      })
+      }
     };
 
-    mockFetch
-      .mockResolvedValueOnce(whisperResponse)
-      .mockResolvedValueOnce(chatgptResponse);
+    mockFetch.mockResolvedValueOnce(whisperResponse as any);  // Whisper uses fetch
+    mockRequestUrl.mockResolvedValueOnce(chatgptResponse);    // ChatGPT uses requestUrl
 
     // Should throw error when ChatGPT fails
     await expect(transcribeWithOpenAI(mockFile, mockSettings, mockApp))
@@ -165,27 +176,28 @@ graph TD
   it('should use FormData for Whisper API request', async () => {
     const whisperResponse = {
       ok: true,
+      status: 200,
       json: async () => ({ text: 'Test transcription' })
     };
 
     const chatgptResponse = {
-      ok: true,
-      json: async () => ({
+      status: 200,
+      json: {
         choices: [{ message: { content: 'SUMMARY:\nTest summary' } }]
-      })
+      }
     };
 
-    mockFetch
-      .mockResolvedValueOnce(whisperResponse)
-      .mockResolvedValueOnce(chatgptResponse);
+    mockFetch.mockResolvedValueOnce(whisperResponse as any);  // Whisper uses fetch
+    mockRequestUrl.mockResolvedValueOnce(chatgptResponse);    // ChatGPT uses requestUrl
 
     await transcribeWithOpenAI(mockFile, mockSettings, mockApp);
 
-    const [, options] = mockFetch.mock.calls[0];
-    expect(options.body).toBeInstanceOf(FormData);
+    // Verify Whisper API call (fetch) uses FormData
+    const [whisperUrl, whisperOptions] = mockFetch.mock.calls[0];
+    expect(whisperOptions.body).toBeInstanceOf(FormData);
 
     // Verify FormData contains required fields
-    const formData = options.body as FormData;
+    const formData = whisperOptions.body as FormData;
     expect(formData.get('model')).toBe('whisper-1');
     expect(formData.get('file')).toBeInstanceOf(Blob);
   });
@@ -199,27 +211,27 @@ graph TD
 
     const whisperResponse = {
       ok: true,
+      status: 200,
       json: async () => ({ text: 'Test' })
     };
 
     const chatgptResponse = {
-      ok: true,
-      json: async () => ({
+      status: 200,
+      json: {
         choices: [{ message: { content: 'SUMMARY:\nTest' } }]
-      })
+      }
     };
 
     for (const file of formats) {
-      mockFetch
-        .mockResolvedValueOnce(whisperResponse)
-        .mockResolvedValueOnce(chatgptResponse);
+      mockFetch.mockResolvedValueOnce(whisperResponse as any);   // Whisper uses fetch
+      mockRequestUrl.mockResolvedValueOnce(chatgptResponse);     // ChatGPT uses requestUrl
       
       await transcribeWithOpenAI(file, mockSettings, mockApp);
       
-      // Check the Whisper call (first call of each pair)
-      const whisperCallIndex = (mockFetch.mock.calls.length - 2);
-      const [, options] = mockFetch.mock.calls[whisperCallIndex];
-      const formData = options.body as FormData;
+      // Check the Whisper call (fetch)
+      const fetchCallIndex = mockFetch.mock.calls.length - 1;
+      const [whisperUrl, whisperOptions] = mockFetch.mock.calls[fetchCallIndex];
+      const formData = whisperOptions.body as FormData;
       const fileBlob = formData.get('file') as Blob;
       
       expect(fileBlob).toBeInstanceOf(Blob);
@@ -229,23 +241,23 @@ graph TD
   it('should handle malformed ChatGPT JSON response', async () => {
     const whisperResponse = {
       ok: true,
+      status: 200,
       json: async () => ({ text: 'Test transcription' })
     };
 
     const chatgptResponse = {
-      ok: true,
-      json: async () => ({
+      status: 200,
+      json: {
         choices: [{
           message: {
             content: 'Invalid JSON content'
           }
         }]
-      })
+      }
     };
 
-    mockFetch
-      .mockResolvedValueOnce(whisperResponse)
-      .mockResolvedValueOnce(chatgptResponse);
+    mockFetch.mockResolvedValueOnce(whisperResponse as any);  // Whisper uses fetch
+    mockRequestUrl.mockResolvedValueOnce(chatgptResponse);    // ChatGPT uses requestUrl
 
     const result = await transcribeWithOpenAI(mockFile, mockSettings, mockApp);
 
@@ -258,23 +270,23 @@ graph TD
   it('should generate appropriate ChatGPT prompt based on settings', async () => {
     const whisperResponse = {
       ok: true,
+      status: 200,
       json: async () => ({ text: 'Test transcription' })
     };
 
     const chatgptResponse = {
-      ok: true,
-      json: async () => ({
+      status: 200,
+      json: {
         choices: [{ message: { content: 'SUMMARY:\nTest summary' } }]
-      })
+      }
     };
 
-    mockFetch
-      .mockResolvedValueOnce(whisperResponse)
-      .mockResolvedValueOnce(chatgptResponse);
+    mockFetch.mockResolvedValueOnce(whisperResponse as any);  // Whisper uses fetch
+    mockRequestUrl.mockResolvedValueOnce(chatgptResponse);    // ChatGPT uses requestUrl
 
     await transcribeWithOpenAI(mockFile, mockSettings, mockApp);
 
-    const chatBody = JSON.parse(mockFetch.mock.calls[1][1].body);
+    const chatBody = JSON.parse(mockRequestUrl.mock.calls[0][0].body);
     const prompt = chatBody.messages[0].content;
 
     expect(prompt).toContain('Test transcription');
@@ -290,18 +302,19 @@ graph TD
       openaiModel: 'gpt-5-nano'
     };
 
-    // Mock Whisper transcription response
+    // Mock Whisper transcription response (uses fetch)
     const whisperResponse = {
       ok: true,
+      status: 200,
       json: async () => ({
         text: 'This is the transcribed content from Whisper.'
       })
     };
 
-    // Mock GPT-5 extras response
+    // Mock GPT-5 extras response (uses requestUrl)
     const gpt5Response = {
-      ok: true,
-      json: async () => ({
+      status: 200,
+      json: {
         choices: [{
           message: {
             content: `SUMMARY:
@@ -316,12 +329,11 @@ graph TD
   B --> C[GPT-5]`
           }
         }]
-      })
+      }
     };
 
-    mockFetch
-      .mockResolvedValueOnce(whisperResponse)  // Whisper call
-      .mockResolvedValueOnce(gpt5Response);    // GPT-5 call for extras
+    mockFetch.mockResolvedValueOnce(whisperResponse as any);  // Whisper uses fetch
+    mockRequestUrl.mockResolvedValueOnce(gpt5Response);       // GPT-5 uses requestUrl
 
     const result = await transcribeWithOpenAI(mockFile, gpt5Settings, mockApp);
 
@@ -330,17 +342,19 @@ graph TD
     expect(result.tags).toEqual(['gpt5', 'whisper', 'hybrid']);
     expect(result.diagram).toContain('graph TD');
 
-    // Verify two API calls: Whisper + GPT-5
-    expect(mockFetch).toHaveBeenCalledTimes(2);
+    // Verify two API calls: Whisper (fetch) + GPT-5 (requestUrl)
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockRequestUrl).toHaveBeenCalledTimes(1);
     
-    // Verify Whisper API call
+    // Verify Whisper API call (fetch)
     const [whisperUrl, whisperOptions] = mockFetch.mock.calls[0];
     expect(whisperUrl).toContain('openai.com/v1/audio/transcriptions');
     expect(whisperOptions.method).toBe('POST');
+    expect(whisperOptions.headers.Authorization).toBe('Bearer test-openai-key');
     
-    // Verify GPT-5 API call for extras
-    const [gpt5Url, gpt5Options] = mockFetch.mock.calls[1];
-    expect(gpt5Url).toContain('openai.com/v1/chat/completions');
+    // Verify GPT-5 API call for extras (requestUrl)
+    const [gpt5Options] = mockRequestUrl.mock.calls[0];
+    expect(gpt5Options.url).toContain('openai.com/v1/chat/completions');
     expect(gpt5Options.headers['Content-Type']).toBe('application/json');
     
     const body = JSON.parse(gpt5Options.body);
@@ -358,37 +372,38 @@ graph TD
       openaiModel: 'gpt-5-nano'
     };
 
-    // Mock Whisper transcription response
+    // Mock Whisper transcription response (uses fetch)
     const whisperResponse = {
       ok: true,
+      status: 200,
       json: async () => ({
         text: 'Transcription from M4A file using Whisper.'
       })
     };
 
-    // Mock GPT-5 extras response
+    // Mock GPT-5 extras response (uses requestUrl)
     const gpt5Response = {
-      ok: true,
-      json: async () => ({
+      status: 200,
+      json: {
         choices: [{
           message: {
             content: `SUMMARY:
 Summary of M4A content.`
           }
         }]
-      })
+      }
     };
 
-    mockFetch
-      .mockResolvedValueOnce(whisperResponse)  // Whisper handles M4A
-      .mockResolvedValueOnce(gpt5Response);    // GPT-5 for extras
+    mockFetch.mockResolvedValueOnce(whisperResponse as any);  // Whisper uses fetch
+    mockRequestUrl.mockResolvedValueOnce(gpt5Response);       // GPT-5 uses requestUrl
 
     const m4aFile = new TFile('test.m4a', 'm4a', 1024);
     const result = await transcribeWithOpenAI(m4aFile, gpt5Settings, mockApp);
 
     expect(result.transcription).toBe('Transcription from M4A file using Whisper.');
     expect(result.summary).toBe('Summary of M4A content.');
-    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockRequestUrl).toHaveBeenCalledTimes(1);
   });
 
   it('should use max_tokens for older models', async () => {
@@ -397,30 +412,30 @@ Summary of M4A content.`
       openaiModel: 'gpt-3.5-turbo'
     };
 
-    // Mock Whisper transcription response
+    // Mock Whisper transcription response (uses fetch)
     const whisperResponse = {
       ok: true,
+      status: 200,
       json: async () => ({
         text: 'Test transcription.'
       })
     };
 
-    // Mock GPT-3.5 extras response
+    // Mock GPT-3.5 extras response (uses requestUrl)
     const gpt35Response = {
-      ok: true,
-      json: async () => ({
+      status: 200,
+      json: {
         choices: [{
           message: {
             content: `SUMMARY:
 Test summary from GPT-3.5.`
           }
         }]
-      })
+      }
     };
 
-    mockFetch
-      .mockResolvedValueOnce(whisperResponse)
-      .mockResolvedValueOnce(gpt35Response);
+    mockFetch.mockResolvedValueOnce(whisperResponse as any);  // Whisper uses fetch
+    mockRequestUrl.mockResolvedValueOnce(gpt35Response);      // GPT-3.5 uses requestUrl
 
     const result = await transcribeWithOpenAI(mockFile, gpt35Settings, mockApp);
 
@@ -428,7 +443,7 @@ Test summary from GPT-3.5.`
     expect(result.summary).toBe('Test summary from GPT-3.5.');
 
     // Verify GPT-3.5 uses max_tokens (not max_completion_tokens)
-    const [, gpt35Options] = mockFetch.mock.calls[1];
+    const [gpt35Options] = mockRequestUrl.mock.calls[0];
     const body = JSON.parse(gpt35Options.body);
     expect(body.model).toBe('gpt-3.5-turbo');
     expect(body.max_tokens).toBe(350); // Older models use max_tokens
