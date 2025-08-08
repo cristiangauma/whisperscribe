@@ -35,14 +35,6 @@ jobs:
       - name: Build plugin
         run: npm run build
 
-      - name: Create styles.css if it doesn't exist
-        run: |
-          if [ ! -f "styles.css" ]; then
-            echo "/* WhisperScribe Plugin Styles - No custom styles needed */" > styles.css
-            echo "/* This file is required for Obsidian plugin compatibility */" >> styles.css
-            echo "" >> styles.css
-            echo "Creating minimal styles.css file"
-          fi
 
       - name: Validate release files
         run: |
