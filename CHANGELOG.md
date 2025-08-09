@@ -1,3 +1,9 @@
+## 0.15.0 (2025-08-09)
+
+### Feat
+
+- **ux**: Improve usage experience notifying the user in which moment of the process is in every moment
+
 ## 0.14.1 (2025-08-09)
 
 ### Refactor
