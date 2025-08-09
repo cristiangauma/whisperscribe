@@ -23,34 +23,38 @@ import {
  * @returns Promise resolving to transcription result with optional summary, tags, and diagram
  */
 export async function transcribeWithOpenAI(
-	file: TFile, 
-	settings: AITranscriptionSettings, 
-	app: App
+    file: TFile,
+    settings: AITranscriptionSettings,
+    app: App,
+    progressCb?: (stage: string) => void
 ): Promise<TranscriptionResult> {
-	const arrayBuffer = await app.vault.readBinary(file);
-	
-	// Always use Whisper for transcription (cheap and supports many formats)
-	const transcriptionResult = await transcribeWithWhisper(arrayBuffer, file, settings);
-	
-	// If advanced features are requested, use the selected model for those
-	if (settings.includeSummary || settings.proposeTags || settings.generateDiagram) {
-		const extras = await generateExtrasWithOpenAI(transcriptionResult.transcription, settings);
-		return { ...transcriptionResult, ...extras };
-	}
-	
-	return transcriptionResult;
+    const arrayBuffer = await app.vault.readBinary(file);
+    
+    // Always use Whisper for transcription (cheap and supports many formats)
+    progressCb?.('Uploading audio to Whisper…');
+    const transcriptionResult = await transcribeWithWhisper(arrayBuffer, file, settings, progressCb);
+    
+    // If advanced features are requested, use the selected model for those
+    if (settings.includeSummary || settings.proposeTags || settings.generateDiagram) {
+        progressCb?.('Generating summary/tags/diagram with OpenAI…');
+        const extras = await generateExtrasWithOpenAI(transcriptionResult.transcription, settings, progressCb);
+        return { ...transcriptionResult, ...extras };
+    }
+    
+    return transcriptionResult;
 }
 
 /**
  * Transcribe using Whisper API (for whisper-1 model)
  */
 async function transcribeWithWhisper(
-	arrayBuffer: ArrayBuffer,
-	file: TFile,
-	settings: AITranscriptionSettings
+    arrayBuffer: ArrayBuffer,
+    file: TFile,
+    settings: AITranscriptionSettings,
+    progressCb?: (stage: string) => void
 ): Promise<TranscriptionResult> {
-	const blob = new Blob([arrayBuffer], { type: getMimeType(file.extension) });
-	const formData = new FormData();
+    const blob = new Blob([arrayBuffer], { type: getMimeType(file.extension) });
+    const formData = new FormData();
 	formData.append('file', blob, file.name);
 	formData.append('model', 'whisper-1');
 	// Anti-hallucination prompt for Whisper
@@ -62,32 +66,33 @@ async function transcribeWithWhisper(
 	
 	// Note: Using fetch here because requestUrl doesn't support FormData
 	// This is the only case where we need FormData for file upload to Whisper API
-	const response = await fetch(apiUrl, {
-		method: 'POST',
-		headers: {
-			'Authorization': `Bearer ${settings.openaiApiKey}`
-		},
-		body: formData
-	});
+    const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${settings.openaiApiKey}`
+        },
+        body: formData
+    });
 
 	if (!response.ok) {
 		const errorData = await response.json();
 		throw new Error(errorData.error?.message || 'Failed to transcribe with OpenAI Whisper');
 	}
 
-	const data = await response.json();
-	let transcription = data.text;
+    progressCb?.('Processing Whisper result…');
+    const data = await response.json();
+    let transcription = data.text;
 	
 	// Clean the transcription to remove repetitive patterns/hallucinations
-	const { cleanedText, hadHallucination } = cleanTranscription(transcription);
-	transcription = cleanedText;
+    const { cleanedText, hadHallucination } = cleanTranscription(transcription);
+    transcription = cleanedText;
 	
 	// If hallucination was detected, add a note
 	if (hadHallucination) {
 		transcription += '\n\n*[Note: Some repetitive content was automatically cleaned from this transcription]*';
 	}
 	
-	return { transcription };
+    return { transcription };
 }
 
 
@@ -99,17 +104,18 @@ async function transcribeWithWhisper(
  * @returns Promise resolving to optional summary, tags, and diagram
  */
 async function generateExtrasWithOpenAI(
-	transcription: string, 
-	settings: AITranscriptionSettings
+    transcription: string,
+    settings: AITranscriptionSettings,
+    progressCb?: (stage: string) => void
 ): Promise<{summary?: string, tags?: string[], diagram?: string}> {
-	const promptText = generateOpenAIExtrasPrompt({
-		includeSummary: settings.includeSummary,
-		summaryLength: settings.summaryLength,
-		proposeTags: settings.proposeTags,
-		generateDiagram: settings.generateDiagram,
-		summaryLanguage: settings.summaryLanguage,
-		customLanguage: settings.customLanguage
-	}, transcription);
+    const promptText = generateOpenAIExtrasPrompt({
+        includeSummary: settings.includeSummary,
+        summaryLength: settings.summaryLength,
+        proposeTags: settings.proposeTags,
+        generateDiagram: settings.generateDiagram,
+        summaryLanguage: settings.summaryLanguage,
+        customLanguage: settings.customLanguage
+    }, transcription);
 	
 	if (!promptText) {
 		return {};
@@ -117,49 +123,50 @@ async function generateExtrasWithOpenAI(
 	
 	const apiUrl = 'https://api.openai.com/v1/chat/completions';
 	
-	const response = await requestUrl({
-		url: apiUrl,
-		method: 'POST',
-		headers: {
-			'Authorization': `Bearer ${settings.openaiApiKey}`,
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			model: settings.openaiModel === 'whisper-1' ? 'gpt-4o-mini' : settings.openaiModel,
-			messages: [
-				...(settings.summaryLanguage && settings.summaryLanguage !== 'same-as-audio' && settings.summaryLanguage !== 'separator' ? [{
-					role: 'system',
-					content: `You are a helpful assistant that ALWAYS responds in ${
-						settings.summaryLanguage === 'custom' ? settings.customLanguage : 
-						settings.summaryLanguage.charAt(0).toUpperCase() + settings.summaryLanguage.slice(1)
-					}. Never use any other language in your responses.`
-				}] : []),
-				{
-					role: 'user',
-					content: promptText
-				}
-			],
-			// Use max_completion_tokens for newer models, max_tokens for older ones
-			// GPT-5 models get no token limits to avoid truncation due to reasoning overhead
-			...(settings.openaiModel.startsWith('gpt-5') ? {
-				// No max_completion_tokens for GPT-5 reasoning models - let them generate complete responses
-			} : {
-				max_tokens: settings.summaryLength === 'short' ? 150 : 
-					settings.summaryLength === 'medium' ? 350 : 
-					settings.summaryLength === 'bullet' ? 250 : 650
-			}),
-			// GPT-5 models only support temperature: 1 (default), other models can use 0.1
-			...(settings.openaiModel.startsWith('gpt-5') ? {} : { temperature: 0.1 })
-		})
-	});
+    const response = await requestUrl({
+        url: apiUrl,
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${settings.openaiApiKey}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            model: settings.openaiModel === 'whisper-1' ? 'gpt-4o-mini' : settings.openaiModel,
+            messages: [
+                ...(settings.summaryLanguage && settings.summaryLanguage !== 'same-as-audio' && settings.summaryLanguage !== 'separator' ? [{
+                    role: 'system',
+                    content: `You are a helpful assistant that ALWAYS responds in ${
+                        settings.summaryLanguage === 'custom' ? settings.customLanguage : 
+                        settings.summaryLanguage.charAt(0).toUpperCase() + settings.summaryLanguage.slice(1)
+                    }. Never use any other language in your responses.`
+                }] : []),
+                {
+                    role: 'user',
+                    content: promptText
+                }
+            ],
+            // Use max_completion_tokens for newer models, max_tokens for older ones
+            // GPT-5 models get no token limits to avoid truncation due to reasoning overhead
+            ...(settings.openaiModel.startsWith('gpt-5') ? {
+                // No max_completion_tokens for GPT-5 reasoning models - let them generate complete responses
+            } : {
+                max_tokens: settings.summaryLength === 'short' ? 150 : 
+                    settings.summaryLength === 'medium' ? 350 : 
+                    settings.summaryLength === 'bullet' ? 250 : 650
+            }),
+            // GPT-5 models only support temperature: 1 (default), other models can use 0.1
+            ...(settings.openaiModel.startsWith('gpt-5') ? {} : { temperature: 0.1 })
+        })
+    });
 	
 	if (response.status >= 400) {
 		throw new Error('Failed to generate summary with OpenAI');
 	}
 	
-	const data = response.json;
-	const responseContent = data.choices[0].message.content;
+    progressCb?.('Parsing OpenAI response…');
+    const data = response.json;
+    const responseContent = data.choices[0].message.content;
 	
 	// Parse using the same logic as Claude responses
-	return parseClaudeResponse(responseContent);
+    return parseClaudeResponse(responseContent);
 }

@@ -16,7 +16,7 @@ import { transcribeWithOpenAI } from '../../providers/openai';
 
 describe('transcribeWithAI', () => {
   const mockFile = new TFile('test.mp3', 'mp3');
-  const mockApp = { vault: { readBinary: jest.fn() } };
+  const mockApp = { vault: { readBinary: jest.fn() } } as any;
   const mockResult = {
     transcription: 'Test transcription',
     summary: 'Test summary',
@@ -45,7 +45,11 @@ describe('transcribeWithAI', () => {
 
     const result = await transcribeWithAI(mockFile, settings, mockApp);
 
-    expect(transcribeWithGemini).toHaveBeenCalledWith(mockFile, settings, mockApp);
+    expect(transcribeWithGemini).toHaveBeenCalled();
+    const gArgs = (transcribeWithGemini as jest.Mock).mock.calls[0];
+    expect(gArgs[0]).toBe(mockFile);
+    expect(gArgs[1]).toBe(settings);
+    expect(gArgs[2]).toBe(mockApp);
     expect(result).toEqual(mockResult);
   });
 
@@ -66,13 +70,17 @@ describe('transcribeWithAI', () => {
 
     const result = await transcribeWithAI(mockFile, settings, mockApp);
 
-    expect(transcribeWithOpenAI).toHaveBeenCalledWith(mockFile, settings, mockApp);
+    expect(transcribeWithOpenAI).toHaveBeenCalled();
+    const oArgs = (transcribeWithOpenAI as jest.Mock).mock.calls[0];
+    expect(oArgs[0]).toBe(mockFile);
+    expect(oArgs[1]).toBe(settings);
+    expect(oArgs[2]).toBe(mockApp);
     expect(result).toEqual(mockResult);
   });
 
   it('should throw error for unknown provider', async () => {
-    const settings: AITranscriptionSettings = {
-      provider: 'unknown' as any,
+    const settings = {
+      provider: 'unknown',
       apiKey: '',
       modelName: '',
       openaiApiKey: '',
@@ -109,9 +117,9 @@ describe('transcribeWithAI', () => {
 
   it('should handle all provider types correctly', async () => {
     const providers: Array<{
-      provider: any;
+      provider: 'google' | 'openai';
       mockFn: jest.Mock;
-      expectedResult: any;
+      expectedResult: typeof mockResult;
     }> = [
       { provider: 'google', mockFn: transcribeWithGemini as jest.Mock, expectedResult: mockResult },
       { provider: 'openai', mockFn: transcribeWithOpenAI as jest.Mock, expectedResult: mockResult }
@@ -135,7 +143,11 @@ describe('transcribeWithAI', () => {
 
       const result = await transcribeWithAI(mockFile, settings, mockApp);
 
-      expect(mockFn).toHaveBeenCalledWith(mockFile, settings, mockApp);
+      expect(mockFn).toHaveBeenCalled();
+      const args = mockFn.mock.calls[0];
+      expect(args[0]).toBe(mockFile);
+      expect(args[1]).toBe(settings);
+      expect(args[2]).toBe(mockApp);
       expect(result).toEqual(expectedResult);
     }
   });

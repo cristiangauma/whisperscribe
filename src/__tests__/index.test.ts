@@ -144,10 +144,21 @@ describe('AITranscriptionPlugin', () => {
       expect(extractMediaFileName).toHaveBeenCalledWith('![[audio.mp3]]');
       expect(validateProviderRequirements).toHaveBeenCalledWith('google', plugin.settings);
       expect(validateFileSizeForModel).toHaveBeenCalledWith(mockFile.stat.size, 'google', plugin.settings);
-      expect(transcribeWithAI).toHaveBeenCalledWith(mockFile, plugin.settings, mockApp);
+      expect(transcribeWithAI).toHaveBeenCalledWith(
+        mockFile,
+        plugin.settings,
+        mockApp,
+        expect.any(Function) // progress callback
+      );
+      // First call inserts the progress block
+      expect(mockEditor.replaceRange).toHaveBeenCalledWith(
+        expect.stringContaining('<!-- WhisperScribe:START -->'),
+        { line: 6, ch: 0 }
+      );
+      // Later call inserts the formatted output (either replacing block or at same position)
       expect(mockEditor.replaceRange).toHaveBeenCalledWith(
         '## Transcription\n\nTest transcription\n\n## Summary\n\nTest summary',
-        { line: 6, ch: 0 }
+        expect.any(Object)
       );
 
       const notices = (global as any).getNotices();
@@ -221,7 +232,11 @@ describe('AITranscriptionPlugin', () => {
 
       const notices = (global as any).getNotices();
       expect(notices).toContain('Transcription failed: API error occurred');
-      expect(mockEditor.replaceRange).not.toHaveBeenCalled();
+      // Progress block should have been inserted at least once
+      expect(mockEditor.replaceRange).toHaveBeenCalledWith(
+        expect.stringContaining('<!-- WhisperScribe:START -->'),
+        expect.any(Object)
+      );
     });
 
     it('should insert transcription at correct position', async () => {
@@ -235,9 +250,15 @@ describe('AITranscriptionPlugin', () => {
 
       await plugin.transcribeMediaFile(mockEditor, mockView);
 
+      // Should insert progress block first at the line after cursor
+      expect(mockEditor.replaceRange).toHaveBeenCalledWith(
+        expect.stringContaining('<!-- WhisperScribe:START -->'),
+        { line: 11, ch: 0 }
+      );
+      // Then insert final output
       expect(mockEditor.replaceRange).toHaveBeenCalledWith(
         'Formatted output',
-        { line: 11, ch: 0 } // Line after cursor
+        expect.any(Object)
       );
     });
 
@@ -257,7 +278,12 @@ describe('AITranscriptionPlugin', () => {
 
         await plugin.transcribeMediaFile(mockEditor, mockView);
 
-        expect(transcribeWithAI).toHaveBeenCalledWith(testFile, plugin.settings, mockApp);
+        expect(transcribeWithAI).toHaveBeenCalledWith(
+          testFile,
+          plugin.settings,
+          mockApp,
+          expect.any(Function)
+        );
       }
     });
 

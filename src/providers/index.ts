@@ -26,16 +26,17 @@ import { transcribeWithOpenAI } from './openai.js';
  * @throws Error if invalid provider is selected
  */
 export async function transcribeWithAI(
-	file: TFile, 
-	settings: AITranscriptionSettings, 
-	app: App
+    file: TFile,
+    settings: AITranscriptionSettings,
+    app: App,
+    progressCb?: (stage: string) => void
 ): Promise<TranscriptionResult> {
-	switch (settings.provider) {
-		case 'google':
-			return transcribeWithGemini(file, settings, app);
-		case 'openai':
-			return transcribeWithOpenAI(file, settings, app);
-		default:
-			throw new Error('Invalid provider selected');
-	}
+    switch (settings.provider) {
+        case 'google':
+            return transcribeWithGemini(file, settings, app, progressCb);
+        case 'openai':
+            return transcribeWithOpenAI(file, settings, app, progressCb);
+        default:
+            throw new Error('Invalid provider selected');
+    }
 }

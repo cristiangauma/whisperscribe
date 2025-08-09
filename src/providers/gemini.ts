@@ -22,12 +22,13 @@ import {
  * @returns Promise resolving to transcription result with optional summary, tags, and diagram
  */
 export async function transcribeWithGemini(
-	file: TFile, 
-	settings: AITranscriptionSettings, 
-	app: App
+    file: TFile,
+    settings: AITranscriptionSettings,
+    app: App,
+    progressCb?: (stage: string) => void
 ): Promise<TranscriptionResult> {
-	const arrayBuffer = await app.vault.readBinary(file);
-	const base64 = arrayBufferToBase64(arrayBuffer);
+    const arrayBuffer = await app.vault.readBinary(file);
+    const base64 = arrayBufferToBase64(arrayBuffer);
 	
 	const mimeType = getMimeType(file.extension);
 	
@@ -63,19 +64,20 @@ export async function transcribeWithGemini(
 		}
 	};
 
-	let response;
-	try {
-		response = await requestUrl({
-			url: apiUrl,
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(requestBody)
-		});
-	} catch (error) {
-		throw new Error(`Network error: ${error.message}`);
-	}
+    let response;
+    try {
+        progressCb?.('Sending audio to Gemini…');
+        response = await requestUrl({
+            url: apiUrl,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        });
+    } catch (error) {
+        throw new Error(`Network error: ${error.message}`);
+    }
 
 	if (response.status !== 200) {
 		let errorMessage = 'Failed to transcribe';
@@ -89,22 +91,24 @@ export async function transcribeWithGemini(
 		throw new Error(`Gemini API error (${response.status}): ${errorMessage}`);
 	}
 
-	const data = JSON.parse(response.text);
+    progressCb?.('Parsing Gemini response…');
+    const data = JSON.parse(response.text);
 	
 	if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
 		throw new Error('No transcription received from Gemini');
 	}
 	
-	const responseText = data.candidates[0].content.parts[0].text;
+    const responseText = data.candidates[0].content.parts[0].text;
 	
 	// Use the advanced features based on settings
 	const hasAdvancedFeatures = settings.includeSummary || settings.proposeTags || settings.generateDiagram;
-	const parsedResult = parseGeneralResponse(responseText, hasAdvancedFeatures);
+    const parsedResult = parseGeneralResponse(responseText, hasAdvancedFeatures);
 	
 	// Clean the transcription to remove repetitive patterns/hallucinations
-	if (parsedResult.transcription) {
-		const { cleanedText, hadHallucination } = cleanTranscription(parsedResult.transcription);
-		parsedResult.transcription = cleanedText;
+    if (parsedResult.transcription) {
+        progressCb?.('Cleaning transcription…');
+        const { cleanedText, hadHallucination } = cleanTranscription(parsedResult.transcription);
+        parsedResult.transcription = cleanedText;
 		
 		// If hallucination was detected, add a note to the result
 		if (hadHallucination) {
@@ -113,5 +117,5 @@ export async function transcribeWithGemini(
 		}
 	}
 	
-	return parsedResult;
+    return parsedResult;
 }

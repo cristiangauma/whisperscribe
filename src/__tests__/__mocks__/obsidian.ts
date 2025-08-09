@@ -51,6 +51,9 @@ export class Plugin {
   saveData = jest.fn().mockResolvedValue(undefined);
   addCommand = jest.fn();
   addSettingTab = jest.fn();
+  addStatusBarItem = jest.fn().mockReturnValue({
+    setText: jest.fn()
+  });
 }
 
 export class PluginSettingTab {
@@ -137,6 +140,7 @@ export class Editor {
   getCursor = jest.fn().mockReturnValue({ line: 0, ch: 0 });
   replaceRange = jest.fn();
   getSelection = jest.fn().mockReturnValue('');
+  lineCount = jest.fn().mockReturnValue(0);
 }
 
 export class MarkdownView {
@@ -149,7 +153,12 @@ export class MarkdownView {
   }
 }
 
-export const requestUrl = jest.fn().mockImplementation(async (options: any) => {
+export const requestUrl = jest.fn().mockImplementation(async (options: {
+  url: string;
+  method: string;
+  headers?: Record<string, string>;
+  body?: string;
+}) => {
   return {
     status: 200,
     headers: {},
