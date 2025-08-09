@@ -1,3 +1,9 @@
+## 0.14.1 (2025-08-09)
+
+### Refactor
+
+- **obsidianbot**: Apply recommendations of ObsidianBot in https://github.com/obsidianmd/obsidian-releases/pull/7377#issuecomment-3170063891
+
 ## 0.14.0 (2025-08-08)
 
 ## 0.13.0 (2025-08-08)
