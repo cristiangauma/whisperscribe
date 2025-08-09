@@ -3,7 +3,7 @@
  * Supports multimodal transcription with advanced features
  */
 
-import { requestUrl, TFile } from 'obsidian';
+import { requestUrl, TFile, App } from 'obsidian';
 import type { TranscriptionResult, AITranscriptionSettings } from '../types/index.js';
 import {
 	arrayBufferToBase64,
@@ -24,7 +24,7 @@ import {
 export async function transcribeWithGemini(
 	file: TFile, 
 	settings: AITranscriptionSettings, 
-	app: any
+	app: App
 ): Promise<TranscriptionResult> {
 	const arrayBuffer = await app.vault.readBinary(file);
 	const base64 = arrayBufferToBase64(arrayBuffer);

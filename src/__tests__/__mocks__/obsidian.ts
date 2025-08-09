@@ -1,5 +1,24 @@
 // Mock implementation of Obsidian API for testing
 
+// Mock UI component types
+export interface TextComponent {
+  setPlaceholder(placeholder: string): TextComponent;
+  setValue(value: string): TextComponent;
+  onChange(callback: (value: string) => void): TextComponent;
+}
+
+export interface ToggleComponent {
+  setValue(value: boolean): ToggleComponent;
+  onChange(callback: (value: boolean) => void): ToggleComponent;
+  setDisabled(disabled: boolean): ToggleComponent;
+}
+
+export interface DropdownComponent {
+  addOption(value: string, text: string): DropdownComponent;
+  setValue(value: string): DropdownComponent;
+  onChange(callback: (value: string) => void): DropdownComponent;
+}
+
 export class TFile {
   path: string;
   name: string;
@@ -19,11 +38,11 @@ export class TFile {
 }
 
 export class Plugin {
-  app: any;
-  manifest: any;
-  settings: any = {};
+  app: App;
+  manifest: Record<string, unknown>;
+  settings: Record<string, unknown> = {};
 
-  constructor(app: any, manifest: any) {
+  constructor(app: App, manifest: Record<string, unknown>) {
     this.app = app;
     this.manifest = manifest;
   }
@@ -35,11 +54,11 @@ export class Plugin {
 }
 
 export class PluginSettingTab {
-  app: any;
-  plugin: any;
+  app: App;
+  plugin: Plugin;
   containerEl: HTMLElement = document.createElement('div');
 
-  constructor(app: any, plugin: any) {
+  constructor(app: App, plugin: Plugin) {
     this.app = app;
     this.plugin = plugin;
   }
@@ -69,7 +88,7 @@ export class Setting {
     return this;
   }
 
-  addText(cb: (text: any) => void) {
+  addText(cb: (text: TextComponent) => void) {
     const mockText = {
       setPlaceholder: jest.fn().mockReturnThis(),
       setValue: jest.fn().mockReturnThis(),
@@ -79,7 +98,7 @@ export class Setting {
     return this;
   }
 
-  addToggle(cb: (toggle: any) => void) {
+  addToggle(cb: (toggle: ToggleComponent) => void) {
     const mockToggle = {
       setValue: jest.fn().mockReturnThis(),
       onChange: jest.fn().mockReturnThis(),
@@ -89,7 +108,7 @@ export class Setting {
     return this;
   }
 
-  addDropdown(cb: (dropdown: any) => void) {
+  addDropdown(cb: (dropdown: DropdownComponent) => void) {
     const mockDropdown = {
       addOption: jest.fn().mockReturnThis(),
       setValue: jest.fn().mockReturnThis(),

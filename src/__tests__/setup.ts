@@ -27,21 +27,21 @@ global.fetch = jest.fn();
 
 // Mock FormData
 global.FormData = class FormData {
-  private data: Map<string, any> = new Map();
+  private data: Map<string, string | Blob | File> = new Map();
   
-  append(key: string, value: any) {
+  append(key: string, value: string | Blob | File) {
     this.data.set(key, value);
   }
   
   get(key: string) {
     return this.data.get(key);
   }
-} as any;
+};
 
 // Mock Blob
 global.Blob = class Blob {
-  constructor(public parts: any[], public options?: any) {}
-} as any;
+  constructor(public parts: (string | Blob)[], public options?: BlobPropertyBag) {}
+};
 
 // Mock FileReader
 global.FileReader = class FileReader {
@@ -56,5 +56,5 @@ global.FileReader = class FileReader {
     }, 0);
   }
   
-  onload: ((event: any) => void) | null = null;
-} as any;
+  onload: ((event: ProgressEvent<FileReader>) => void) | null = null;
+};

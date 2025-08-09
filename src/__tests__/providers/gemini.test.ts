@@ -1,5 +1,5 @@
 import { transcribeWithGemini } from '../../providers/gemini';
-import { TFile } from 'obsidian';
+import { TFile, App } from 'obsidian';
 import { AITranscriptionSettings } from '../../types';
 
 // Mock requestUrl from obsidian
@@ -12,11 +12,7 @@ import { requestUrl } from 'obsidian';
 const mockRequestUrl = requestUrl as jest.MockedFunction<typeof requestUrl>;
 
 // Mock app
-const mockApp = {
-  vault: {
-    readBinary: jest.fn()
-  }
-};
+const mockApp = new App();
 
 describe('transcribeWithGemini', () => {
   const mockSettings: AITranscriptionSettings = {

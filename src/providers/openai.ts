@@ -3,7 +3,7 @@
  * Uses Whisper API for transcription (cheap, supports many formats) + selected model for advanced features
  */
 
-import { TFile, requestUrl } from 'obsidian';
+import { TFile, requestUrl, App } from 'obsidian';
 import type { TranscriptionResult, AITranscriptionSettings } from '../types/index.js';
 import {
 	getMimeType,
@@ -25,7 +25,7 @@ import {
 export async function transcribeWithOpenAI(
 	file: TFile, 
 	settings: AITranscriptionSettings, 
-	app: any
+	app: App
 ): Promise<TranscriptionResult> {
 	const arrayBuffer = await app.vault.readBinary(file);
 	

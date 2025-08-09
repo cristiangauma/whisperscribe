@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import { AI_PROVIDERS, AITranscriptionSettings, PROVIDER_MODELS, ModelConfig, SummaryLanguage } from '../types';
+import { AI_PROVIDERS, AITranscriptionSettings, PROVIDER_MODELS, ModelConfig, SummaryLanguage, AIProvider } from '../types';
 import { isModelGeneralist } from '../utils';
 import type AITranscriptionPlugin from '../index';
 
@@ -51,13 +51,9 @@ export class AITranscriptionSettingTab extends PluginSettingTab {
 		const currentConfig = this.getCurrentModelConfig(provider, currentModel);
 		if (currentConfig && !currentConfig.isCustom) {
 			const infoEl = containerEl.createEl('div', {
-				cls: 'setting-item-description',
+				cls: 'setting-item-description whisperscribe-info-box',
 				text: `📊 ${currentConfig.description}`
 			});
-			infoEl.style.backgroundColor = '#f8f9fa';
-			infoEl.style.padding = '8px';
-			infoEl.style.borderRadius = '4px';
-			infoEl.style.marginBottom = '12px';
 			
 			containerEl.createEl('p', {
 				cls: 'setting-item-description',
@@ -117,9 +113,11 @@ export class AITranscriptionSettingTab extends PluginSettingTab {
 				});
 				dropdown.setValue(this.plugin.settings.provider)
 					.onChange(async (value) => {
-						this.plugin.settings.provider = value as any;
-						await this.plugin.saveSettings();
-						this.display();
+						if (value === 'google' || value === 'openai') {
+							this.plugin.settings.provider = value as AIProvider;
+							await this.plugin.saveSettings();
+							this.display();
+						}
 					});
 			});
 
@@ -237,13 +235,8 @@ export class AITranscriptionSettingTab extends PluginSettingTab {
 		
 		if (!isGeneralist) {
 			const warningDiv = containerEl.createEl('div', {
-				cls: 'setting-item-description'
+				cls: 'setting-item-description whisperscribe-warning'
 			});
-			warningDiv.style.backgroundColor = '#f0f8ff';
-			warningDiv.style.border = '1px solid #add8e6';
-			warningDiv.style.borderRadius = '4px';
-			warningDiv.style.padding = '8px';
-			warningDiv.style.marginBottom = '12px';
 			
 			let currentModelId = '';
 			switch (provider) {
@@ -252,11 +245,9 @@ export class AITranscriptionSettingTab extends PluginSettingTab {
 			}
 			const modelConfig = this.getCurrentModelConfig(provider, currentModelId);
 			const warningText = warningDiv.createEl('p', {
+				cls: 'whisperscribe-warning-text',
 				text: `ℹ️ The selected model (${modelConfig?.name || 'current model'}) specializes in transcription only. Advanced features (summary, tags, diagrams) are not available.`
 			});
-			warningText.style.margin = '0';
-			warningText.style.fontSize = '0.9em';
-			warningText.style.color = '#0066cc';
 		}
 		
 		// Summary setting

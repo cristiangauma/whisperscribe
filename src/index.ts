@@ -65,7 +65,12 @@ export default class AITranscriptionPlugin extends Plugin {
 			}
 
 			// Check file size against model limits
-			const stat = (file as TFile).stat;
+			if (!(file instanceof TFile)) {
+				new Notice('Invalid file type');
+				return;
+			}
+			
+			const stat = file.stat;
 			const fileSizeValidation = validateFileSizeForModel(stat.size, this.settings.provider, this.settings);
 			if (!fileSizeValidation.isValid) {
 				new Notice(fileSizeValidation.errorMessage || 'File size exceeds model limit');
@@ -75,7 +80,7 @@ export default class AITranscriptionPlugin extends Plugin {
 			new Notice('Starting transcription...');
 			
 			// Process with the selected AI provider
-			const result = await transcribeWithAI(file as TFile, this.settings, this.app);
+			const result = await transcribeWithAI(file, this.settings, this.app);
 			
 			// Insert transcription after the media file line
 			const insertPosition = {

@@ -277,6 +277,46 @@ The `main` branch protection can be configured to **require**:
 - Patterns like `test-api-key`, `fake-key` are ignored
 - Mock credentials must be clearly identifiable as non-real
 
+## Obsidian Plugin Guidelines
+
+### Obsidian Community Store Requirements
+
+Based on feedback from the Obsidian review bot, the following guidelines must be followed:
+
+**Required Changes**:
+1. **Avoid inline styles** - Never assign styles via JavaScript/HTML
+   - ❌ `element.style.backgroundColor = '#f8f9fa'`
+   - ✅ `element.addClass('whisperscribe-info-box')`
+   - Move all style assignments to CSS classes in `styles.css`
+   - This ensures better theme compatibility
+
+2. **Use instanceof checks** - Avoid type casting where possible
+   - ❌ `const stat = (file as TFile).stat`
+   - ✅ `if (file instanceof TFile) { const stat = file.stat; }`
+   - Proper type guards prevent runtime errors
+
+**Optional Recommendations**:
+1. **Minimize `any` type usage** - Use specific types where possible
+   - ❌ `app: any` 
+   - ✅ `app: App` (import from obsidian)
+   - ❌ `provider as any`
+   - ✅ `provider as AIProvider` with runtime validation
+   - Exception: Test mocks can use `any` for simplicity
+
+2. **Improve test file type safety** - Use specific types where practical
+   - ❌ `const mockApp = { vault: { readBinary: jest.fn() } }`
+   - ✅ `const mockApp = new App()` (uses properly typed mock)
+   - ❌ `let mockPlugin: any`
+   - ✅ `interface MockPlugin { settings: AITranscriptionSettings; saveSettings: jest.Mock }`
+   - Enhanced mock types in `__mocks__/obsidian.ts` with proper UI component interfaces
+   - `as any` is still acceptable for complex external API mocks (fetch responses, etc.)
+
+### CSS Class Naming Convention
+Use plugin-specific class names to avoid conflicts:
+- `whisperscribe-info-box`
+- `whisperscribe-warning`
+- `whisperscribe-model-limit`
+
 ## Documentation Maintenance
 
 **IMPORTANT**: When modifying CI/CD workflows, update this CLAUDE.md file to reflect the actual implementation.

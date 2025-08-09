@@ -5,7 +5,7 @@
  * and includes the main transcription routing logic.
  */
 
-import type { TFile } from 'obsidian';
+import type { TFile, App } from 'obsidian';
 import type { AIProvider, TranscriptionResult, AITranscriptionSettings } from '../types/index.js';
 
 // Provider implementations
@@ -28,7 +28,7 @@ import { transcribeWithOpenAI } from './openai.js';
 export async function transcribeWithAI(
 	file: TFile, 
 	settings: AITranscriptionSettings, 
-	app: any
+	app: App
 ): Promise<TranscriptionResult> {
 	switch (settings.provider) {
 		case 'google':

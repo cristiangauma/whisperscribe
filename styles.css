@@ -1,2 +1,25 @@
-/* WhisperScribe Plugin Styles - No custom styles needed */
-/* This file is required for Obsidian plugin compatibility */
+/* WhisperScribe Plugin Styles */
+
+/* Info box for provider information */
+.whisperscribe-info-box {
+    background-color: var(--background-secondary);
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+}
+
+/* Warning box for provider limitations */
+.whisperscribe-warning {
+    background-color: var(--background-modifier-info);
+    border: 1px solid var(--background-modifier-info-hover);
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 12px;
+}
+
+/* Warning text inside warning boxes */
+.whisperscribe-warning-text {
+    margin: 0;
+    font-size: 0.9em;
+    color: var(--text-accent);
+}

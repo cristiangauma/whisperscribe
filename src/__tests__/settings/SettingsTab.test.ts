@@ -20,11 +20,18 @@ jest.mock('obsidian', () => ({
 }));
 
 import { isProviderGeneralist } from '../../utils';
+import { AIProvider, AITranscriptionSettings } from '../../types';
+
+// Mock plugin interface for testing
+interface MockPlugin {
+  settings: AITranscriptionSettings;
+  saveSettings: jest.Mock;
+}
 
 describe('AITranscriptionSettingTab', () => {
   let settingTab: AITranscriptionSettingTab;
   let mockApp: App;
-  let mockPlugin: any;
+  let mockPlugin: MockPlugin;
 
   beforeEach(() => {
     mockApp = new App();
@@ -87,7 +94,7 @@ describe('AITranscriptionSettingTab', () => {
       const validProviders = ['google', 'openai'];
       
       validProviders.forEach(provider => {
-        mockPlugin.settings.provider = provider as any;
+        mockPlugin.settings.provider = provider as AIProvider;
         expect(mockPlugin.settings.provider).toBe(provider);
       });
     });

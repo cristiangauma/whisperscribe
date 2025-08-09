@@ -1,5 +1,5 @@
 import { transcribeWithOpenAI } from '../../providers/openai';
-import { TFile } from 'obsidian';
+import { TFile, App } from 'obsidian';
 import { AITranscriptionSettings } from '../../types';
 
 // Mock both requestUrl and fetch
@@ -16,11 +16,7 @@ const mockRequestUrl = requestUrl as jest.MockedFunction<typeof requestUrl>;
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
 
 // Mock app
-const mockApp = {
-  vault: {
-    readBinary: jest.fn()
-  }
-};
+const mockApp = new App();
 
 describe('transcribeWithOpenAI (Hybrid: Whisper + Selected Model)', () => {
   const mockSettings: AITranscriptionSettings = {
